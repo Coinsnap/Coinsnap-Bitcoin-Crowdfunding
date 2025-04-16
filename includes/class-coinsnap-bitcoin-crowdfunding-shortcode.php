@@ -157,7 +157,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
                     </div>
                     <label for="coinsnap-bitcoin-crowdfunding-amount-crowdfunding">Amount</label>
                     <div class="amount-wrapper">
-                        <input type="text" id="coinsnap-bitcoin-crowdfunding-amount-crowdfunding" placeholder="Enter custom amount">
+                        <input class="crowdfunding-input-field" type="text" id="coinsnap-bitcoin-crowdfunding-amount-crowdfunding" placeholder="Enter custom amount">
                         <div class="secondary-amount">
                             <span id="coinsnap-bitcoin-crowdfunding-satoshi-crowdfunding"></span>
                         </div>
