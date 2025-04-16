@@ -58,7 +58,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
             'Donor Information',
             'Donor Information',
             'manage_options',
-            'edit.php?post_type=bitcoin-pds'
+            'edit.php?post_type=crowdfunding-pds'
         );
     }
 

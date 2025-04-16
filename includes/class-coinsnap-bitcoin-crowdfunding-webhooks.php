@@ -223,11 +223,22 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks
                     $custom = $payload_data['metadata']['donorCustom'];
                     $type = $payload_data['metadata']['formType'];
                     $amount = $payload_data['metadata']['amount'];
+                    $shoutoutName = $payload_data['metadata']['name'];
+                    $shoutoutMessage = $payload_data['metadata']['message'];
+                    $message = !empty($message) ? $message : $shoutoutMessage;
+                    if(empty($name)){
+                        if(!empty($shoutoutName) || !empty($shoutoutMessage)){
+                            $name = empty($shoutoutName) ? 'Shoutout from Anonymous' : 'Shoutout from ' . $shoutoutName;
+                        } else {
+                            $name = 'Anonymous';
+                        }
+                    }
+                    
                     $opt_out_value = filter_var($opt_out, FILTER_VALIDATE_BOOLEAN) ? '1' : '0';
                     $post_data = array(
                         'post_title'    => $name,
                         'post_status'   => 'publish',
-                        'post_type'     => 'bitcoin-pds',
+                        'post_type'     => 'crowdfunding-pds',
                         'post_content'  => $message
                     );
 
