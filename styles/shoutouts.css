@@ -1,0 +1,153 @@
+#coinsnap-bitcoin-crowdfunding-shoutouts-form {
+  border-radius: 0px;
+  box-shadow: none;
+  max-width: 645px;
+}
+
+#coinsnap-bitcoin-crowdfunding-shoutouts-form input {
+  margin-bottom: 4px;
+}
+
+#coinsnap-bitcoin-crowdfunding-shoutouts-form button {
+  width: 30%;
+}
+
+.shoutouts-list-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+#coinsnap-bitcoin-crowdfunding-shoutouts-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  max-width: 645px;
+  width: 100%;
+}
+
+.coinsnap-bitcoin-crowdfunding-shoutout-top {
+  display: flex;
+  justify-content: space-between;
+  margin: 16px;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #a8a8a866;
+  font-size: 18px;
+}
+
+.coinsnap-bitcoin-crowdfunding-shoutout-top-right {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.coinsnap-bitcoin-crowdfunding-shoutout-top-right-amount {
+  background-color: #bababaac;
+  padding: 0px 20px;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+}
+
+.coinsnap-bitcoin-crowdfunding-shoutout-top-right-days {
+  font-size: 14px;
+  color: #696767;
+}
+
+.coinsnap-bitcoin-crowdfunding-dark-theme .coinsnap-bitcoin-crowdfunding-shoutout-top-right-days {
+  color: #ffffff !important;
+}
+
+.highlight {
+  font-weight: 400;
+  background-color: #f7931a;
+}
+
+.highlight-shoutout {
+  border: 4px solid #f7931a !important;
+}
+
+.coinsnap-bitcoin-crowdfunding-shoutout-help {
+  font-size: 12px;
+  color: #a8a8a8;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.coinsnap-bitcoin-crowdfunding-shoutout-help p {
+  margin: 2px;
+}
+
+#coinsnap-bitcoin-crowdfunding-shoutout-help-premium {
+  display: none;
+  color: #f7941ac4;
+}
+
+#coinsnap-bitcoin-crowdfunding-shoutout-help-minimum {
+  display: none;
+  color: #e55e65;
+}
+
+.coinsnap-bitcoin-crowdfunding-shoutout-bottom {
+  margin: 16px;
+  font-size: 16px
+}
+
+.coinsnap-bitcoin-crowdfunding-shoutout {
+  border-radius: 4px;
+  padding: 10px 4px;
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.shoutout-form-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.shoutout-form-left {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.shoutout-form-right {
+  display: flex;
+  flex-direction: column;
+  height: 140px;
+}
+
+.coinsnap-bitcoin-crowdfunding-shoutout-message {
+  width: 100%;
+  resize: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  box-sizing: border-box;
+  flex-grow: 1;
+  margin-bottom: 10px;
+}
+
+.shoutout-input-label {
+  width: 100%;
+}
+
+.shoutout-button-container {
+  display: flex;
+  justify-content: center;
+}
+
+.shoutout-form-wrapper {
+  padding: 30px;
+  border: 2px solid #d6d6d687;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+#coinsnap-bitcoin-crowdfunding-shoutout-name {
+  padding: 8px !important;
+
+}

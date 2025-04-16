@@ -1,0 +1,74 @@
+.wide-form input {
+  margin-bottom: 0px !important;
+}
+
+.wide-form {
+  max-width: 645px;
+}
+
+.wide-form-button {
+  width: 80% !important;
+  height: 40px !important;
+  align-self: flex-end !important;
+  margin-top: 0px !important;
+}
+
+.amount-field {
+  width: 140px;
+}
+
+.wide-message-text-area {
+  flex-grow: 1;
+}
+
+.coinsnap-bitcoin-crowdfunding-wide-down {
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+}
+
+.coinsnap-bitcoin-crowdfunding-wide-field-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0px 30px 30px 30px;
+
+}
+
+.coinsnap-bitcoin-crowdfunding-multi-wide-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 30px;
+}
+
+.coinsnap-bitcoin-crowdfunding-wide-up {
+  display: flex;
+  gap: 8px;
+}
+
+.multi-wide-button {
+  width: 31% !important;
+  align-self: center;
+}
+
+.mulit-wide-label-left {
+  width: 31%;
+}
+
+.mulit-wide-label-right {
+  width: 69%;
+  /* Nice */
+}
+
+#coinsnap-bitcoin-crowdfunding-form-wide {
+  padding: 38px 8px 8px 8px;
+}
+
+.wide-form .snap-primary-amount {
+  font-size: 14px;
+}
+
+.wide-form .snap-secondary-amount {
+  font-size: 12px;
+}
