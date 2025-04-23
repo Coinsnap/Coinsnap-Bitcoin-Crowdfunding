@@ -723,7 +723,8 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   padding: 28px 48px;
-  width: 645px;
+  width: -webkit-fill-available;
+  width: -moz-available;
   box-sizing: border-box;
 }
 
@@ -736,7 +737,9 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   padding: 28px 48px;
-  width: 645px;
+  flex-grow: 1;
+  width: -webkit-fill-available;
+  width: -moz-available;
   box-sizing: border-box;
 }
 
@@ -949,11 +952,11 @@
 }
 
 #bitcoin-crowdfunding-form {
-  width: 100%;
+  /* width: 100%; */
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 100%;
+  /* max-width: 100%; */
 }
 
 .crowdfunding-input-field {

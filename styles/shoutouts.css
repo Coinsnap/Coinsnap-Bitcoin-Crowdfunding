@@ -23,7 +23,8 @@
   flex-direction: column;
   gap: 26px;
   max-width: 645px;
-  width: 100%;
+  /* width: 100%; */
+  flex-grow: 1;
 }
 
 .coinsnap-bitcoin-crowdfunding-shoutout-top {
