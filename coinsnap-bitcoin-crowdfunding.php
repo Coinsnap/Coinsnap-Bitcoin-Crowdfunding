@@ -101,31 +101,16 @@ class Coinsnap_Bitcoin_Crowdfunding
         wp_enqueue_script('coinsnap-bitcoin-crowdfunding-popup-script', plugin_dir_url(__FILE__) . 'js/popup.js', ['jquery'], '1.0.0', true);
     }
 
-    private function get_webhook_secret()
-    {
-        $option_name = 'coinsnap_webhook_secret';
-        $secret = get_option($option_name);
-
-        if (!$secret) {
-            $secret = bin2hex(random_bytes(16));
-            add_option($option_name, $secret, '', false);
-        }
-
-        return $secret;
-    }
-
     function coinsnap_bitcoin_crowdfunding_enqueue_admin_styles($hook)
     {
-        error_log('Enqueueing admin styles for hook: ' . $hook);
         if ($hook === 'bitcoin-crowdfunding_page_coinsnap-bitcoin-crowdfunding-donation-list') {
             wp_enqueue_style('coinsnap-bitcoin-crowdfunding-admin-style', plugin_dir_url(__FILE__) . 'styles/admin-style.css', [], '1.0.0');
         } else if ($hook === 'toplevel_page_coinsnap_bitcoin_crowdfunding') {
             wp_enqueue_style('coinsnap-bitcoin-crowdfunding-admin-style', plugin_dir_url(__FILE__) . 'styles/admin-style.css', [], '1.0.0');
-            $secret = $this->get_webhook_secret();
             $options = get_option('coinsnap_bitcoin_crowdfunding_options', []);
             $ngrok_url = isset($options['ngrok_url']) ? $options['ngrok_url'] : '';
             wp_enqueue_script('coinsnap-bitcoin-crowdfunding-admin-script', plugin_dir_url(__FILE__) . 'js/admin.js', ['jquery'], '1.0.0', true);
-            wp_localize_script('coinsnap-bitcoin-crowdfunding-admin-script', 'adminData', ['webhookSecret' => $secret, 'ngrokUrl' => $ngrok_url]);
+            wp_localize_script('coinsnap-bitcoin-crowdfunding-admin-script', 'adminData', ['ngrokUrl' => $ngrok_url]);
         }
     }
 
