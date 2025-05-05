@@ -86,8 +86,7 @@ const addPopupListener = (prefix, sufix, type, exchangeRates, redirect) => {
         const validForm = !publicDonor || checkRequiredFieds([firstNameField, lastNameField, emailField, streetField, houseNumberField, postalCodeField, cityField, countryField, customField]);
         const publicName = document.getElementById(`${prefix}public-name${sufix}`);
         const publicMessage = document.getElementById(`${prefix}public-message${sufix}`);
-        console.log('publicName', publicName.value)
-        console.log('publicMessage', publicMessage.value)
+        const crowdfundName = document.getElementById('bitcoin-crowdfunding-form').dataset.name || '';
         const metadata = {
             donorName: `${firstNameField?.value ?? ''} ${lastNameField?.value ?? ''}`,
             donorEmail: emailField?.value,
@@ -100,7 +99,8 @@ const addPopupListener = (prefix, sufix, type, exchangeRates, redirect) => {
             crowdfunding_id: crowdfundingId,
             name: publicName?.value,
             message: publicMessage?.value,
-            orderNumber: "Donated for Crowdfunding"
+            orderNumber: "Donated for Crowdfunding",
+            crowdfundName: crowdfundName,
         }
         if (!validForm) return;
 

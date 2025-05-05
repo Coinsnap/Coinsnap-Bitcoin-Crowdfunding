@@ -87,7 +87,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
 
         ob_start();
         ?>
-        <div id="bitcoin-crowdfunding-form" data-crowdfunding-id="<?php echo $crowdfunding_id; ?>" class="coinsnap-bitcoin-crowdfunding-form-wrapper <?php echo esc_attr($theme_class); ?> wide-form">
+        <div id="bitcoin-crowdfunding-form" data-crowdfunding-id="<?php echo $crowdfunding_id; ?>" data-name="<?php echo $title; ?>" class="coinsnap-bitcoin-crowdfunding-form-wrapper <?php echo esc_attr($theme_class); ?> wide-form">
 
             <div class="crowdfunding-wrapper">
                 <div class="crowdfunding-title-wrapper">
