@@ -123,7 +123,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
             ?>
                 <div class="crowdfunding-payment-form">
                     <div class="crowdfunding-pay-title-wrapper">
-                        <h4 style="font-weight: normal;">Donate text description</h4>
+                        <h4 style="font-weight: normal;">Donation form</h4>
                         <select id="coinsnap-bitcoin-crowdfunding-swap-crowdfunding" class="currency-swapper" data-default-currency="<?php echo $default_curreny; ?>">
                             <option value="sats">SATS</option>
                             <option value="EUR">EUR</option>
