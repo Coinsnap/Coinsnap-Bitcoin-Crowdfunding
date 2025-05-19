@@ -13,7 +13,7 @@ const checkRequiredFieds = (fields) => {
     return valid;
 }
 
-const addPopupListener = (prefix, sufix, type, exchangeRates, redirect) => {
+const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redirect) => {
     let walletHandler = null;
 
     const resetPopup = (prefix, sufix) => {
