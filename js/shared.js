@@ -423,7 +423,10 @@ const NumericICrowdfundingnput = (inputFieldName) => {
             if (event.charCode == 0) {
                 return;
             }
-
+            if (`${inp.value}`.includes(sep) && event.key == sep) {
+                event.preventDefault();
+                return;
+            }
             if (-1 == numericKeys.indexOf(event.key)) {
                 event.preventDefault();
                 return;
