@@ -1,77 +1,80 @@
-=== Coinsnap Bitcoin Crowdfunding ===
+# Coinsnap Bitcoin Crowdfunding
 
 Contributors: coinsnap
 Tags: Lightning, SATS, bitcoin, crowdfunding, fundraising, BTCPay
-Tested up to: 6.7
+Tested up to: 6.8
 Stable tag: 1.0.0
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Instant Bitcoin/Sats crowdfunding campaigns on WordPress website directly to your wallet
+Collect Bitcoin with Coinsnap or BTCPay Server from your community to fund personal, creative or social projects – directly on your WordPress site.
 
-== Description ==
+## Description
 
-[Coinsnap](https://coinsnap.io/en/) Bitcoin Crowdfunding plugin allows you to run Bitcoin Lightning crowdfunding campaigns over the Lightning network. 
-With the Coinsnap Bitcoin-Lightning payment plugin you only need a Lightning wallet with a Lightning address to accept Bitcoin Lightning payments on your WordPress crowdfunding campaigns.
+### Coinsnap Bitcoin Crowdfunding – Raise Bitcoin for Any Project
 
-* Coinsnap Bitcoin Crowdfunding Demo Site: https://crowdfunding.coinsnap.org/
-* Blog Article: https://coinsnap.io/en/
-* WordPress: https://wordpress.org/plugins/bitcoin-crowdfunding/
-* GitHub: https://github.com/Coinsnap/Bitcoin-Crowdfunding
+With this plugin, you can easily collect Bitcoin from your community to fund personal, creative, or social projects – directly on your WordPress site.
 
+Whether you’re raising sats for a gift, a group trip, a book launch, a local event, or a full-scale crowdfunding campaign – the Coinsnap Bitcoin Crowdfunding Plugin makes it incredibly easy to collect Bitcoin for your cause.
 
-== Bitcoin and Lightning payments in Crowdfunding Plugin ==
+With Coinsnap Bitcoin Crowdfunding, you can e.g.
 
-The Bitcoin Crowdfunding plugin allows you to launch Bitcoin crowdfunding campaigns on your site fast and simply.
+* **Fund a creative project**, a social cause, or a private goal
+* **Collect sats** for birthdays, events, travel, renovations, or group gifts
+* **Run a public or private campaign** with just your WordPress website and the plugin
+* **Accept donations directly** to your Lightning wallet
+* Just **define your fundraising goal** in sats, describe your project, and start collecting!
 
-With the Coinsnap Bitcoin Lightning payment processing plugin you can immediately accept Bitcoin Lightning payments for your crowdfunding campaigns. You don't need your own Lightning node or any other technical requirements if you'd like to provide payments via Coinsnap payment gateway.
+Coinsnap Bitcoin Crowdfunding works with Coinsnap or your own BTCPay Server.
 
-Simply register on [Coinsnap](https://app.coinsnap.io/register), enter your own Lightning address and install the Coinsnap payment module in your WordPress backend. Add your store ID and your API key which you'll find in your Coinsnap account, and your supporters can fund your campaigns with Bitcoin Lightning right away!
+### Requirements:
 
-If you want to use another BTCPay server as Payment provider, you need to know your store ID, your API key and gateway URL as required parameters.
+* A WordPress website
+* The Coinsnap Bitcoin Crowdfunding plugin
+* A [Coinsnap account](https://app.coinsnap.io/register) or your own BTCPay Server
 
+### Features & functions:
 
-= Coinsnap features: =
+* **Customize your crowdfunding form**: 
+	* **Describe the purpose** of the crowdfunding
+	* **Set fundraising goals** in sats
+	* **Set 3 predefined donation values**5
+	* **Collect optional donor info**: name, email, message, shoutout
+	* **Create a thank you-message**
+	* **Show real-time shoutouts** and donations on your site
+* Easy **integration via shortcodes** - donation buttons can be placed anywhere on your website by pasting the shortcode at the appropriate place.
+* **Receive payments directly into your Bitcoin wallet** - either via Coinsnap or your own BTCPay Server.
 
-* **All you need is your email and a Lightning Wallet with a Lightning address. [Here you can find an overview of suitable Lightning Wallets](https://coinsnap.io/en/lightning-wallet-with-lightning-address/)**
+### Quick setup:
 
-* **Accept Bitcoin and Lightning payments** for your crowdfunding campaigns **without running your own technical infrastructure.** You do not need your own server, nor do you need to run your own Lightning Node. You also do not need a shop-system, for you can collect funds right out of your forms using the Coinsnap for Content Form 7-plugin.
+* Install plugin directly via the WordPress plugin directory
+* Configure with just a few clicks
+* And that's it!
 
-* **Quick and easy registration at Coinsnap**: Just enter your email address and your Lightning address – and you are ready to integrate the payment module and start collecting Bitcoin Lightning for your campaigns. You will find the necessary IDs and Keys in your Coinsnap account, too.
+### Two operating modes:
 
-* **100% protected privacy**:
-    * We do not collect personal data.
-    * For the registration you only need an e-mail address, which we will also use to inform you when you have received a payment.
-    * No other personal information is required as long as you request a withdrawal to a Lightning address or Bitcoin address.
+* Use Coinsnap (no technical know-how required)
+* Or use your own BTCPay server (for advanced users)
 
-* **Only 1 % fees!**:
-    * No basic fee, no transaction fee, only 1% on the invoice amount with referrer code.
-    * Without referrer code the fee is 1.25%.
-    * Get a referrer code from our [partners](https://coinsnap.io/en/partner/) and customers and save 0.25% fee.
+### Why Coinsnap Bitcoin Donation?
 
-* **No KYC needed**:
-    * Direct, P2P payments (instantly to your Lightning wallet)
-    * No intermediaries and paperwork
-    * Transaction information is only shared between you and your supporters
-
-* **Sophisticated merchant's admin dashboard in Coinsnap:**:
-    * See all your campaign transactions at a glance
-    * Follow-up on individual payments
-    * See issues with payments
-    * Export reports
-
-* **A Bitcoin payment via Lightning offers significant advantages**:
-    * Lightning **payments are executed immediately.**
-    * Lightning **payments are credited directly to the recipient.**
-    * Lightning **payments are inexpensive.**
-    * Lightning **payments are guaranteed.** No chargeback risk for the merchant.
-    * Lightning **payments can be used worldwide.**
-    * Lightning **payments are perfect for micropayments.**
-
-* **Multilingual interface and support**: We speak your language
+* Open source and free in the WordPress Plugin Directory
+* No programming knowledge required
+* Immediate credit to your Bitcoin wallet
+* GDPR-friendly: no unnecessary data storage
+* Continuous further development 
+* Strong support through our support team, accessible in your Coinsnap account
 
 
-= Documentation: =
+### More information:
+
+* Coinsnap Bitcoin Crowdfunding Demo Site: [https://crowdfunding.coinsnap.org/](https://crowdfunding.coinsnap.org/)
+* Product page: [https://coinsnap.io/coinsnap-bitcoin-crowdfunding-plugin/](https://coinsnap.io/coinsnap-bitcoin-crowdfunding-plugin/)
+* Installation Guide: [https://coinsnap.io/coinsnap-bitcoin-crowdfunding-installation-guide/](https://coinsnap.io/coinsnap-bitcoin-crowdfunding-installation-guide/)
+* GitHub: [https://github.com/Coinsnap/Coinsnap-Bitcoin-Crowdfunding](https://github.com/Coinsnap/Coinsnap-Bitcoin-Crowdfunding)
+
+
+### Documentation:
 
 * [Coinsnap API (1.0) documentation](https://docs.coinsnap.io/)
 * [Frequently Asked Questions](https://coinsnap.io/en/faq/) 
@@ -79,7 +82,8 @@ If you want to use another BTCPay server as Payment provider, you need to know y
 * [Privacy Policy](https://coinsnap.io/en/privacy/)
 
 
-== Installation ==
+
+## Installation
 
 ### 1. Install the Bitcoin Crowdfunding plug-in from the WordPress directory. ###
 
