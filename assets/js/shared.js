@@ -28,21 +28,6 @@ const removeCrowdfundingBorderOnFocus = (field1, field2) => {
 
 }
 
-async function generateCrowdfundingQRCodeDataURL(text) {
-    try {
-        const response = await fetch(`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(text)}`);
-        const blob = await response.blob();
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(blob);
-        });
-    } catch (error) {
-        console.error('Error generating QR code:', error);
-        return null;
-    }
-}
-
 const handleCrowdfundingButtonClick = (buttonId, honeypotId, amountId, satoshiId, messageId, lastInputCurrency, name) => {
     event.preventDefault();
 
@@ -147,11 +132,11 @@ const updateCrowdfundingValueField = (amount, fieldName, operation, exchangeRate
 async function fetchCrowdfundingCoinsnapExchangeRates() {
     const exchangeRates = {}
     try {
-        const response = await fetch(`https://app.coinsnap.io/api/v1/stores/${sharedData.coinsnapStoreId}/rates`, {
+        const response = await fetch(`https://app.coinsnap.io/api/v1/stores/${Coinsnap_Bitcoin_Crowdfunding_sharedData.coinsnapStoreId}/rates`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'x-api-key': sharedData.coinsnapApiKey
+                'x-api-key': Coinsnap_Bitcoin_Crowdfunding_sharedData.coinsnapApiKey
             }
         });
 
@@ -202,16 +187,16 @@ const createActualCrowdfundingInvoice = async (amount, message, lastInputCurrenc
     }
 
     const url = coinsnap
-        ? `https://app.coinsnap.io/api/v1/stores/${sharedData?.coinsnapStoreId}/invoices`
-        : `${sharedData?.btcpayUrl}/api/v1/stores/${sharedData?.btcpayStoreId}/invoices`;
+        ? `https://app.coinsnap.io/api/v1/stores/${Coinsnap_Bitcoin_Crowdfunding_sharedData?.coinsnapStoreId}/invoices`
+        : `${sharedData?.btcpayUrl}/api/v1/stores/${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayStoreId}/invoices`;
 
     const headers = coinsnap
         ? {
-            'x-api-key': sharedData?.coinsnapApiKey,
+            'x-api-key': Coinsnap_Bitcoin_Crowdfunding_sharedData?.coinsnapApiKey,
             'Content-Type': 'application/json'
         }
         : {
-            'Authorization': `token ${sharedData?.btcpayApiKey}`,
+            'Authorization': `token ${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayApiKey}`,
             'Content-Type': 'application/json'
         };
 
@@ -240,7 +225,7 @@ const createActualCrowdfundingInvoice = async (amount, message, lastInputCurrenc
         setCookie('coinsnap_invoice_', JSON.stringify(invoiceCookieData), 15);
 
         if (!coinsnap) {
-            const url = `${sharedData?.btcpayUrl}/api/v1/stores/${sharedData?.btcpayStoreId}/invoices/${responseData.id}/payment-methods`;
+            const url = `${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayUrl}/api/v1/stores/${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayStoreId}/invoices/${responseData.id}/payment-methods`;
             const response2 = await fetch(url, {
                 method: 'GET',
                 headers: headers,
@@ -272,17 +257,17 @@ const createActualCrowdfundingInvoice = async (amount, message, lastInputCurrenc
 const checkCrowdfundingInvoiceStatus = async (invoiceId, amount, message, lastInputCurrency, name, coinsnap, type, redirect, metadata) => {
 
     const url = coinsnap
-        ? `https://app.coinsnap.io/api/v1/stores/${sharedData.coinsnapStoreId}/invoices/${invoiceId}`
-        : `${sharedData.btcpayUrl}/api/v1/stores/${sharedData.btcpayStoreId}/invoices/${invoiceId}`;
+        ? `https://app.coinsnap.io/api/v1/stores/${Coinsnap_Bitcoin_Crowdfunding_sharedData.coinsnapStoreId}/invoices/${invoiceId}`
+        : `${Coinsnap_Bitcoin_Crowdfunding_sharedData.btcpayUrl}/api/v1/stores/${Coinsnap_Bitcoin_Crowdfunding_sharedData.btcpayStoreId}/invoices/${invoiceId}`;
 
     const headers = coinsnap
         ? {
-            'x-api-key': sharedData.coinsnapApiKey,
+            'x-api-key': Coinsnap_Bitcoin_Crowdfunding_sharedData.coinsnapApiKey,
             'Content-Type': 'application/json'
 
         }
         : {
-            'Authorization': `token ${sharedData.btcpayApiKey}`,
+            'Authorization': `token ${Coinsnap_Bitcoin_Crowdfunding_sharedData.btcpayApiKey}`,
             'Content-Type': 'application/json'
         };
 
@@ -299,7 +284,7 @@ const checkCrowdfundingInvoiceStatus = async (invoiceId, amount, message, lastIn
         var responseData = await response.json();
 
         if (!coinsnap) {
-            const url = `${sharedData?.btcpayUrl}/api/v1/stores/${sharedData?.btcpayStoreId}/invoices/${responseData.id}/payment-methods`;
+            const url = `${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayUrl}/api/v1/stores/${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayStoreId}/invoices/${responseData.id}/payment-methods`;
             const response2 = await fetch(url, {
                 method: 'GET',
                 headers: headers,
@@ -350,7 +335,7 @@ const createCrowdfundingInvoice = async (amount, message, lastInputCurrency, nam
                 message,
                 lastInputCurrency,
                 name,
-                sharedData.provider == 'coinsnap',
+                Coinsnap_Bitcoin_Crowdfunding_sharedData.provider == 'coinsnap',
                 type,
                 redirect,
                 metadata
@@ -363,7 +348,7 @@ const createCrowdfundingInvoice = async (amount, message, lastInputCurrency, nam
                 message,
                 lastInputCurrency,
                 name,
-                sharedData.provider == 'coinsnap',
+                Coinsnap_Bitcoin_Crowdfunding_sharedData.provider == 'coinsnap',
                 type,
                 redirect,
                 metadata
@@ -375,7 +360,7 @@ const createCrowdfundingInvoice = async (amount, message, lastInputCurrency, nam
             message,
             lastInputCurrency,
             name,
-            sharedData.provider == 'coinsnap',
+            Coinsnap_Bitcoin_Crowdfunding_sharedData.provider == 'coinsnap',
             type,
             redirect,
             metadata

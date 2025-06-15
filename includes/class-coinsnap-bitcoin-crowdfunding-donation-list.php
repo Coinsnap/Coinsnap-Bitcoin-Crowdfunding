@@ -1,7 +1,7 @@
 <?php
+if (!defined('ABSPATH')){ exit; }
 
-class Coinsnap_Bitcoin_Crowdfunding_Donation_List
-{
+class Coinsnap_Bitcoin_Crowdfunding_Donation_List {
 
 	public function __construct()
 	{
@@ -67,7 +67,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Donation_List
 		$donations        = $this->fetch_donations();
 
 		$donations_per_page = 20;
-		$current_page = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
+		$current_page = (filter_input(INPUT_GET,'paged',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null)? max(1, intval(filter_input(INPUT_GET,'paged',FILTER_SANITIZE_FULL_SPECIAL_CHARS))) : 1;
 		$total_donations = count($donations);
 		$total_pages   = ceil($total_donations / $donations_per_page);
 		$offset = ($current_page - 1) * $donations_per_page;
@@ -81,23 +81,23 @@ class Coinsnap_Bitcoin_Crowdfunding_Donation_List
 			<?php elseif ($provider === 'btcpay'): ?>
 				<h4>Check <a href="<?php echo esc_html($btcpay_href); ?>" target="_blank" rel="noopener noreferrer">BtcPay server</a> for a detailed overview</h4>
 			<?php else: ?>
-				<p>Provider not recognized.</p>
+				<p><?php echo esc_html__('Provider not recognized.','coinsnap-bitcoin-crowdfunding');?></p>
 			<?php endif; ?>
 
 			<table class="wp-list-table widefat fixed striped donation-list-table">
 				<thead>
 					<tr>
-						<th>Date</th>
-						<th>Amount</th>
-						<th>Name</th>
-						<th>Message</th>
-						<th>Invoice ID</th>
+						<th><?php echo esc_html__('Date','coinsnap-bitcoin-crowdfunding');?></th>
+						<th><?php echo esc_html__('Amount','coinsnap-bitcoin-crowdfunding');?></th>
+						<th><?php echo esc_html__('Name','coinsnap-bitcoin-crowdfunding');?></th>
+						<th><?php echo esc_html__('Message','coinsnap-bitcoin-crowdfunding');?></th>
+						<th><?php echo esc_html__('Invoice ID','coinsnap-bitcoin-crowdfunding');?></th>
 					</tr>
 				</thead>
 				<tbody id="donation-list-body">
 					<?php
 					if (empty($donations_page)) {
-						echo '<tr><td colspan="5">No donations found.</td></tr>';
+						echo '<tr><td colspan="5">'. esc_html__('No donations found.','coinsnap-bitcoin-crowdfunding'). '</td></tr>';
 					} else {
 						foreach ($donations_page as $donation) {
 							$this->render_donation_row($donation);
@@ -115,12 +115,12 @@ class Coinsnap_Bitcoin_Crowdfunding_Donation_List
 					'format'    => '',
 					'current'   => $current_page,
 					'total'     => $total_pages,
-					'prev_text' => __('&laquo; Previous'),
-					'next_text' => __('Next &raquo;'),
+					'prev_text' => esc_html('&laquo; ' . __('Previous','coinsnap-bitcoin-crowdfunding')),
+					'next_text' => esc_html(__('Next','coinsnap-bitcoin-crowdfunding') . ' &raquo;'),
 				]);
 
 				if ($pagination_links) {
-					echo '<div class="tablenav"><div class="tablenav-pages">' . $pagination_links . '</div></div>';
+					echo '<div class="tablenav"><div class="tablenav-pages">' . wp_kses($pagination_links,['span'=>['aria-current'=>true,'class'=>true],'a'=>['href'  => true,'title' => true],'class'=>true]) . '</div></div>';
 				}
 			}
 			?>
@@ -143,7 +143,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Donation_List
 	?>
 		<tr>
 			<td>
-				<?php echo esc_html(date('Y-m-d H:i:s', (int)$donation[$isBtcpay ? 'createdTime' :  'createdAt'])); ?>
+				<?php echo esc_html(gmdate('Y-m-d H:i:s', (int)$donation[$isBtcpay ? 'createdTime' :  'createdAt'])); ?>
 			</td>
 
 			<td>
@@ -156,7 +156,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Donation_List
 			<td><?php echo esc_html($name); ?></td>
 			<td><?php echo esc_html($message); ?></td>
 			<td>
-				<a href="<?php echo $href; ?>" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+				<a href="<?php echo esc_url($href); ?>" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
 					<?php echo esc_html($invoice_id); ?>
 				</a>
 

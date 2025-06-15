@@ -205,6 +205,30 @@
         ? checkConnection.css({ color: 'green' }).text('Connection successful')
         : checkConnection.css({ color: 'red' }).text('Connection failed');
     }
+    
+    //  Crownfunding list
+    function toggleDonorFields() {
+                    if ($('input[name="coinsnap_bitcoin_crowdfunding_collect_donor_info"]').is(':checked')) {
+                        $('#donor-info-fields').show();
+                    } else {
+                        $('#donor-info-fields').hide();
+                    }
+                }
+
+    function toggleShoutoutShortcode() {
+                    if ($('input[name="coinsnap_bitcoin_crowdfunding_shoutout"]').is(':checked')) {
+                        $('#shoutout-shortcode-row').show();
+                    } else {
+                        $('#shoutout-shortcode-row').hide();
+                    }
+                }
+
+    $('input[name="coinsnap_bitcoin_crowdfunding_collect_donor_info"]').change(toggleDonorFields);
+    $('input[name="coinsnap_bitcoin_crowdfunding_shoutout"]').change(toggleShoutoutShortcode);
+
+    toggleDonorFields();
+    toggleShoutoutShortcode();
+    
   });
 
 })(jQuery);

@@ -25,7 +25,7 @@ jQuery(document).ready(function ($) {
             exchangeRates = rates
             if (crowdfundingDonation) {
                 crowdfundingDefaults()
-                addPopupListener('coinsnap-bitcoin-crowdfunding-', '-crowdfunding', 'Bitcoin Crowdfunding', exchangeRates)
+                addCrowdfundingPopupListener('coinsnap-bitcoin-crowdfunding-', '-crowdfunding', 'Bitcoin Crowdfunding', exchangeRates)
             }
         });
 

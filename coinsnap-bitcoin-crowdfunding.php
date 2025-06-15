@@ -1,10 +1,34 @@
 <?php
 /*
-Plugin Name: Bitcoin Crowdfunding
-Description: Easy Bitcoin crowdfundings on a WordPress website
-Version: 1.0
-Author: Coinsnap
-*/
+ * Plugin Name:        Coinsnap Bitcoin Crowdfunding
+ * Plugin URI:         https://coinsnap.io/coinsnap-bitcoin-crowdfunding-plugin/
+ * Description:        Easy Bitcoin crowdfundings on a WordPress website
+ * Version:            1.0.0
+ * Author:             Coinsnap
+ * Author URI:         https://coinsnap.io/
+ * Text Domain:        coinsnap-bitcoin-crowdfunding
+ * Domain Path:         /languages
+ * Tested up to:        6.8
+ * License:             GPL2
+ * License URI:         https://www.gnu.org/licenses/gpl-2.0.html
+ *
+ * Network:             true
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+if ( ! defined( 'COINSNAP_BITCOIN_CROWDFUNDING_REFERRAL_CODE' ) ) {
+    define( 'COINSNAP_BITCOIN_CROWDFUNDING_REFERRAL_CODE', 'D40892' );
+}
+if ( ! defined( 'COINSNAP_BITCOIN_CROWDFUNDING_VERSION' ) ) {
+    define( 'COINSNAP_BITCOIN_CROWDFUNDING_VERSION', '1.0.0' );
+}
+if ( ! defined( 'COINSNAP_BITCOIN_CROWDFUNDING_PHP_VERSION' ) ) {
+    define( 'COINSNAP_BITCOIN_CROWDFUNDING_PHP_VERSION', '8.0' );
+}
+if( ! defined( 'COINSNAP_BITCOIN_CROWDFUNDING_PLUGIN_DIR' ) ){
+    define('COINSNAP_BITCOIN_CROWDFUNDING_PLUGIN_DIR',plugin_dir_url(__FILE__));
+}
 
 if (!defined('ABSPATH')) {
     exit;
@@ -65,20 +89,12 @@ class Coinsnap_Bitcoin_Crowdfunding
 
     function coinsnap_bitcoin_crowdfunding_enqueue_scripts()
     {
-        wp_enqueue_style('coinsnap-bitcoin-crowdfunding-style', plugin_dir_url(__FILE__) . 'styles/style.css', [], '1.0.0');
-        wp_enqueue_style('coinsnap-bitcoin-crowdfunding-style-wide', plugin_dir_url(__FILE__) . 'styles/style-wide.css', [], '1.0.0');
-        wp_enqueue_style('coinsnap-bitcoin-crowdfunding-shoutouts', plugin_dir_url(__FILE__) . 'styles/shoutouts.css', [], '1.0.0');
+        wp_enqueue_style('coinsnap-bitcoin-crowdfunding-style', plugin_dir_url(__FILE__) . 'assets/css/style.css', [], COINSNAP_BITCOIN_CROWDFUNDING_VERSION);
+        wp_enqueue_style('coinsnap-bitcoin-crowdfunding-style-wide', plugin_dir_url(__FILE__) . 'assets/css/style-wide.css', [], COINSNAP_BITCOIN_CROWDFUNDING_VERSION);
+        wp_enqueue_style('coinsnap-bitcoin-crowdfunding-shoutouts', plugin_dir_url(__FILE__) . 'assets/css/shoutouts.css', [], COINSNAP_BITCOIN_CROWDFUNDING_VERSION);
 
-        wp_enqueue_script('coinsnap-bitcoin-crowdfunding-script', plugin_dir_url(__FILE__) . 'js/crowdfunding.js', ['jquery'], '1.0.0', true);
-        $provider_defaults = [
-            'provider' => 'coinsnap',
-            'coinsnap_store_id' => '',
-            'coinsnap_api_key' => '',
-            'btcpay_store_id' => '',
-            'btcpay_api_key' => '',
-            'btcpay_url' => '',
-        ];
-        $provider_options = array_merge($provider_defaults, (array) get_option('coinsnap_bitcoin_crowdfunding_options', []));
+        wp_enqueue_script('coinsnap-bitcoin-crowdfunding-script', plugin_dir_url(__FILE__) . 'assets/js/crowdfunding.js', ['jquery'], COINSNAP_BITCOIN_CROWDFUNDING_VERSION, true);
+        
 
         // Define defaults for forms options
         $forms_defaults = [
@@ -86,8 +102,8 @@ class Coinsnap_Bitcoin_Crowdfunding
         ];
 
         // Localize script for sharedData
-        wp_enqueue_script('coinsnap-bitcoin-crowdfunding-shared-script', plugin_dir_url(__FILE__) . 'js/shared.js', ['jquery'], '1.0.0', true);
-        wp_localize_script('coinsnap-bitcoin-crowdfunding-shared-script', 'sharedData', [
+        wp_enqueue_script('coinsnap-bitcoin-crowdfunding-shared-script', plugin_dir_url(__FILE__) . 'assets/js/shared.js', ['jquery'], COINSNAP_BITCOIN_CROWDFUNDING_VERSION, true);
+        wp_localize_script('coinsnap-bitcoin-crowdfunding-shared-script', 'Coinsnap_Bitcoin_Crowdfunding_sharedData', [
             'provider' => $provider_options['provider'],
             'coinsnapStoreId' => $provider_options['coinsnap_store_id'],
             'coinsnapApiKey' => $provider_options['coinsnap_api_key'],
@@ -98,26 +114,25 @@ class Coinsnap_Bitcoin_Crowdfunding
             'nonce' => wp_create_nonce('wp_rest')
         ]);
 
-        wp_enqueue_script('coinsnap-bitcoin-crowdfunding-popup-script', plugin_dir_url(__FILE__) . 'js/popup.js', ['jquery'], '1.0.0', true);
+        wp_enqueue_script('coinsnap-bitcoin-crowdfunding-popup-script', plugin_dir_url(__FILE__) . 'assets/js/popup.js', ['jquery'], COINSNAP_BITCOIN_CROWDFUNDING_VERSION, true);
     }
 
     function coinsnap_bitcoin_crowdfunding_enqueue_admin_styles($hook)
     {
         if ($hook === 'bitcoin-crowdfunding_page_coinsnap-bitcoin-crowdfunding-donation-list') {
-            wp_enqueue_style('coinsnap-bitcoin-crowdfunding-admin-style', plugin_dir_url(__FILE__) . 'styles/admin-style.css', [], '1.0.0');
+            wp_enqueue_style('coinsnap-bitcoin-crowdfunding-admin-style', plugin_dir_url(__FILE__) . 'assets/css/admin-style.css', [], COINSNAP_BITCOIN_CROWDFUNDING_VERSION);
         } else if ($hook === 'toplevel_page_coinsnap_bitcoin_crowdfunding') {
-            wp_enqueue_style('coinsnap-bitcoin-crowdfunding-admin-style', plugin_dir_url(__FILE__) . 'styles/admin-style.css', [], '1.0.0');
+            wp_enqueue_style('coinsnap-bitcoin-crowdfunding-admin-style', plugin_dir_url(__FILE__) . 'assets/css/admin-style.css', [], COINSNAP_BITCOIN_CROWDFUNDING_VERSION);
             $options = get_option('coinsnap_bitcoin_crowdfunding_options', []);
-            $ngrok_url = isset($options['ngrok_url']) ? $options['ngrok_url'] : '';
-            wp_enqueue_script('coinsnap-bitcoin-crowdfunding-admin-script', plugin_dir_url(__FILE__) . 'js/admin.js', ['jquery'], '1.0.0', true);
-            wp_localize_script('coinsnap-bitcoin-crowdfunding-admin-script', 'adminData', ['ngrokUrl' => $ngrok_url]);
+            wp_enqueue_script('coinsnap-bitcoin-crowdfunding-admin-script', plugin_dir_url(__FILE__) . 'assets/js/admin.js', ['jquery'], COINSNAP_BITCOIN_CROWDFUNDING_VERSION, true);
+            
         }
     }
 
     function coinsnap_bitcoin_crowdfunding_verify_nonce($nonce, $action)
     {
         if (!wp_verify_nonce($nonce, $action)) {
-            wp_die(__('Security check failed', 'coinsnap_bitcoin_crowdfunding'));
+            wp_die(esc_html__('Security check failed', 'coinsnap-bitcoin-crowdfunding'));
         }
     }
 }

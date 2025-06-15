@@ -32,7 +32,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
 
         $crowdfunding_id = intval($atts['id']);
         // Check if crowdfunding_id is valid and post exists
-        if (!$crowdfunding_id || get_post_type($crowdfunding_id) !== 'bitcoin-cfs') {
+        if (!$crowdfunding_id || get_post_type($crowdfunding_id) !== 'coinsnap-cfs') {
             return '<p>Invalid or missing poll ID.</p>';
         }
         $title = get_the_title($crowdfunding_id);
@@ -52,16 +52,12 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
         $default_value3 = get_post_meta($crowdfunding_id, '_coinsnap_bitcoin_crowdfundings_default_value_3', true);
         $thank_you = get_post_meta($crowdfunding_id, '_coinsnap_bitcoin_crowdfundings_thank_you_message', true);
         $shoutout = get_post_meta($crowdfunding_id, '_coinsnap_bitcoin_crowdfundings_shoutout', true);
-        $default_curreny = get_post_meta($crowdfunding_id, '_coinsnap_bitcoin_crowdfundings_default_currency', true);
+        $default_currency = get_post_meta($crowdfunding_id, '_coinsnap_bitcoin_crowdfundings_default_currency', true);
 
         global $wpdb;
         $table_name = $wpdb->prefix . 'crowdfunding_payments';
         $results = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM {$table_name} 
-            WHERE crowdfunding_id = %d AND status = 'completed'",
-                $crowdfunding_id
-            )
+            $wpdb->prepare("SELECT * FROM %i WHERE crowdfunding_id = %d AND status = 'completed'",$table_name,$crowdfunding_id)
         );
         $donations = count($results);
         $raised = 0;
@@ -78,7 +74,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
                     style="display: flex;justify-content: center; flex-direction: column; align-items: center; margin: 0">
                     <h3><?php echo esc_html($title); ?></h3>
                 </div>
-                <h4 style="text-align: center;">This form is not active</h4>
+                <h4 style="text-align: center;"><?php echo esc_html__('This form is not active','coinsnap-bitcoin-crowdfunding'); ?></h4>
 
             </div>
         <?php
@@ -87,7 +83,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
 
         ob_start();
         ?>
-        <div id="bitcoin-crowdfunding-form" data-crowdfunding-id="<?php echo $crowdfunding_id; ?>" data-name="<?php echo $title; ?>" class="coinsnap-bitcoin-crowdfunding-form-wrapper <?php echo esc_attr($theme_class); ?> wide-form">
+        <div id="bitcoin-crowdfunding-form" data-crowdfunding-id="<?php echo esc_attr($crowdfunding_id); ?>" data-name="<?php echo esc_attr($title); ?>" class="coinsnap-bitcoin-crowdfunding-form-wrapper <?php echo esc_attr($theme_class); ?> wide-form">
 
             <div class="crowdfunding-wrapper">
                 <div class="crowdfunding-title-wrapper">
@@ -124,8 +120,8 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
                 <div class="crowdfunding-payment-form">
                     <div class="crowdfunding-pay-title-wrapper">
                         <h4 style="font-weight: normal;">Donation form</h4>
-                        <select id="coinsnap-bitcoin-crowdfunding-swap-crowdfunding" class="currency-swapper" data-default-currency="<?php echo $default_curreny; ?>">
-                            <option value="sats">SATS</option>
+                        <select id="coinsnap-bitcoin-crowdfunding-swap-crowdfunding" class="currency-swapper" data-default-currency="<?php echo esc_attr($default_currency); ?>">
+                            <option value="SATS">SATS</option>
                             <option value="EUR">EUR</option>
                             <option value="USD">USD</option>
                             <option value="CAD">CAD</option>
@@ -138,31 +134,31 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
                     <div class="crowdfunding-prefills">
                         <div class="crowdfunding-prefill" id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding-snap1">
                             <div class="crowdfunding-prefill-amount">
-                                <div data-default-value="<?php echo $default_value1; ?>" id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding-snap1-primary"></div>
+                                <div data-default-value="<?php echo esc_attr($default_value1); ?>" id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding-snap1-primary"></div>
                             </div>
                             <div id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding-snap1-secondary" class="crowdfunding-prefill-alt-amount"></div>
                         </div>
                         <div class="crowdfunding-prefill" id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding-snap2">
                             <div class="crowdfunding-prefill-amount">
-                                <div data-default-value="<?php echo $default_value2; ?>" id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding-snap2-primary"></div>
+                                <div data-default-value="<?php echo esc_attr($default_value2); ?>" id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding-snap2-primary"></div>
                             </div>
                             <div id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding-snap2-secondary" class="crowdfunding-prefill-alt-amount"></div>
                         </div>
                         <div class="crowdfunding-prefill" id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding-snap3">
                             <div class="crowdfunding-prefill-amount">
-                                <div data-default-value="<?php echo $default_value3; ?>" id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding-snap3-primary"></div>
+                                <div data-default-value="<?php echo esc_attr($default_value3); ?>" id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding-snap3-primary"></div>
                             </div>
                             <div id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding-snap3-secondary" class="crowdfunding-prefill-alt-amount"></div>
                         </div>
                     </div>
-                    <label for="coinsnap-bitcoin-crowdfunding-amount-crowdfunding">Amount</label>
+                    <label for="coinsnap-bitcoin-crowdfunding-amount-crowdfunding"><?php echo esc_html__('Amount','coinsnap-bitcoin-crowdfunding'); ?></label>
                     <div class="amount-wrapper">
-                        <input class="crowdfunding-input-field" type="text" id="coinsnap-bitcoin-crowdfunding-amount-crowdfunding" placeholder="Enter custom amount">
+                        <input class="crowdfunding-input-field" type="text" id="coinsnap-bitcoin-crowdfunding-amount-crowdfunding" placeholder="<?php echo esc_html__('Enter custom amount','coinsnap-bitcoin-crowdfunding'); ?>">
                         <div class="secondary-amount">
                             <span id="coinsnap-bitcoin-crowdfunding-satoshi-crowdfunding"></span>
                         </div>
                     </div>
-                    <button class="crowdfunding-pay" id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding">Donate</button>
+                    <button class="crowdfunding-pay" id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding"><?php echo esc_html__('Donate','coinsnap-bitcoin-crowdfunding'); ?></button>
 
                 </div>
             <?php
@@ -170,7 +166,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
             ?>
                 <div class="crowdfunding-payment-form">
                     <div style="justify-content: center; padding-top: 36px" class="crowdfunding-pay-title-wrapper">
-                        <h3>Goal is reached. Thank you for your support!</h3>
+                        <h3><?php echo esc_html__('Goal is reached. Thank you for your support!','coinsnap-bitcoin-crowdfunding'); ?></h3>
                     </div>
                 </div>
             <?php

@@ -11,13 +11,13 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
         add_action('init', [$this, 'register_custom_meta_fields']);
         add_action('add_meta_boxes', [$this, 'add_crowdfundings_metaboxes']);
         add_action('save_post', [$this, 'save_crowdfundings_meta'], 10, 2);
-        add_filter('manage_bitcoin-cfs_posts_columns', [$this, 'add_custom_columns']);
-        add_action('manage_bitcoin-cfs_posts_custom_column', [$this, 'populate_custom_columns'], 10, 2);
+        add_filter('manage_coinsnap-cfs_posts_columns', [$this, 'add_custom_columns']);
+        add_action('manage_coinsnap-cfs_posts_custom_column', [$this, 'populate_custom_columns'], 10, 2);
     }
 
     public function register_crowdfundings_post_type()
     {
-        register_post_type('bitcoin-cfs', [
+        register_post_type('coinsnap-cfs', [
             'labels' => [
                 'name'               => 'Crowdfundings',
                 'singular_name'      => 'Crowdfunding',
@@ -36,7 +36,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
             'show_ui'            => true,
             'show_in_menu'       => false,
             'query_var'          => true,
-            'rewrite'            => ['slug' => 'bitcoin-cfs'],
+            'rewrite'            => ['slug' => 'coinsnap-cfs'],
             'capability_type'    => 'post',
             'has_archive'        => false,
             'hierarchical'       => false,
@@ -47,79 +47,79 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
 
     public function register_custom_meta_fields()
     {
-        register_meta('post', '_coinsnap_bitcoin_crowdfundings_description', [
-            'object_subtype' => 'bitcoin-cfs',
+        register_meta('post', '_coinsnap_bitcoin_crowdfunding_description', [
+            'object_subtype' => 'coinsnap-cfs',
             'type' => 'string',
             'single' => true,
             'show_in_rest' => true,
         ]);
 
-        register_meta('post', '_coinsnap_bitcoin_crowdfundings_amount', [
-            'object_subtype' => 'bitcoin-cfs',
+        register_meta('post', '_coinsnap_bitcoin_crowdfunding_amount', [
+            'object_subtype' => 'coinsnap-cfs',
             'type' => 'number',
             'single' => true,
             'show_in_rest' => true,
             'description' => 'Amount in satoshis',
         ]);
 
-        register_meta('post', '_coinsnap_bitcoin_crowdfundings_thank_you_message', [
-            'object_subtype' => 'bitcoin-cfs',
+        register_meta('post', '_coinsnap_bitcoin_crowdfunding_thank_you_message', [
+            'object_subtype' => 'coinsnap-cfs',
             'type' => 'string',
             'single' => true,
             'show_in_rest' => true,
         ]);
 
-        register_meta('post', '_coinsnap_bitcoin_crowdfundings_active', [
-            'object_subtype' => 'bitcoin-cfs',
+        register_meta('post', '_coinsnap_bitcoin_crowdfunding_active', [
+            'object_subtype' => 'coinsnap-cfs',
             'type' => 'boolean',
             'single' => true,
             'show_in_rest' => true,
         ]);
 
-        register_meta('post', '_coinsnap_bitcoin_crowdfundings_collect_donor_info', [
-            'object_subtype' => 'bitcoin-cfs',
+        register_meta('post', '_coinsnap_bitcoin_crowdfunding_collect_donor_info', [
+            'object_subtype' => 'coinsnap-cfs',
             'type' => 'boolean',
             'single' => true,
             'show_in_rest' => true,
         ]);
 
-        register_meta('post', '_coinsnap_bitcoin_crowdfundings_default_value_1', [
-            'object_subtype' => 'bitcoin-cfs',
+        register_meta('post', '_coinsnap_bitcoin_crowdfunding_default_value_1', [
+            'object_subtype' => 'coinsnap-cfs',
             'type' => 'number',
             'single' => true,
             'show_in_rest' => true,
         ]);
 
-        register_meta('post', '_coinsnap_bitcoin_crowdfundings_default_value_2', [
-            'object_subtype' => 'bitcoin-cfs',
+        register_meta('post', '_coinsnap_bitcoin_crowdfunding_default_value_2', [
+            'object_subtype' => 'coinsnap-cfs',
             'type' => 'number',
             'single' => true,
             'show_in_rest' => true,
         ]);
 
-        register_meta('post', '_coinsnap_bitcoin_crowdfundings_default_value_3', [
-            'object_subtype' => 'bitcoin-cfs',
+        register_meta('post', '_coinsnap_bitcoin_crowdfunding_default_value_3', [
+            'object_subtype' => 'coinsnap-cfs',
             'type' => 'number',
             'single' => true,
             'show_in_rest' => true,
         ]);
 
-        register_meta('post', '_coinsnap_bitcoin_crowdfundings_custom_field_name', [
-            'object_subtype' => 'bitcoin-cfs',
+        register_meta('post', '_coinsnap_bitcoin_crowdfunding_custom_field_name', [
+            'object_subtype' => 'coinsnap-cfs',
             'type' => 'string',
             'single' => true,
             'show_in_rest' => true,
         ]);
 
-        register_meta('post', '_coinsnap_bitcoin_crowdfundings_default_currency', [
-            'object_subtype' => 'bitcoin-cfs',
+        register_meta('post', '_coinsnap_bitcoin_crowdfunding_default_currency', [
+            'object_subtype' => 'coinsnap-cfs',
             'type' => 'string',
             'single' => true,
             'show_in_rest' => true,
         ]);
 
-        register_meta('post', '_coinsnap_bitcoin_crowdfundings_shoutout', [
-            'object_subtype' => 'bitcoin-cfs',
+        register_meta('post', '_coinsnap_bitcoin_crowdfunding_shoutout', [
+            'object_subtype' => 'coinsnap-cfs',
             'type' => 'boolean',
             'single' => true,
             'show_in_rest' => true,
@@ -129,10 +129,10 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
     public function add_crowdfundings_metaboxes()
     {
         add_meta_box(
-            'coinsnap_bitcoin_crowdfundings_details',
+            'coinsnap_bitcoin_crowdfunding_details',
             'Crowdfundings Details',
             [$this, 'render_crowdfundings_metabox'],
-            'bitcoin-cfs',
+            'coinsnap-cfs',
             'normal',
             'high'
         );
@@ -140,82 +140,56 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
 
     public function render_crowdfundings_metabox($post)
     {
-        wp_nonce_field('coinsnap_bitcoin_crowdfundings_nonce', 'coinsnap_bitcoin_crowdfundings_nonce');
+        wp_nonce_field('coinsnap_bitcoin_crowdfunding_nonce', 'coinsnap_bitcoin_crowdfunding_nonce');
 
-        $description = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfundings_description', true);
-        $amount = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfundings_amount', true);
-        $thank_you_message = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfundings_thank_you_message', true);
-        $active = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfundings_active', true);
-        $collect_donor_info = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfundings_collect_donor_info', true);
-        $default_value_1 = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfundings_default_value_1', true);
-        $default_value_2 = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfundings_default_value_2', true);
-        $default_value_3 = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfundings_default_value_3', true);
-        $custom_field_name = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfundings_custom_field_name', true);
-        $default_currency = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfundings_default_currency', true) ?: 'sats';
-        $shoutout = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfundings_shoutout', true);
+        $description = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfunding_description', true);
+        $amount = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfunding_amount', true);
+        $thank_you_message = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfunding_thank_you_message', true);
+        $active = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfunding_active', true);
+        $collect_donor_info = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfunding_collect_donor_info', true);
+        $default_value_1 = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfunding_default_value_1', true);
+        $default_value_2 = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfunding_default_value_2', true);
+        $default_value_3 = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfunding_default_value_3', true);
+        $custom_field_name = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfunding_custom_field_name', true);
+        $default_currency = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfunding_default_currency', true) ?: 'sats';
+        $shoutout = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfunding_shoutout', true);
         $donor_fields = [
-            'first_name' => 'First Name',
-            'last_name' => 'Last Name',
-            'email' => 'Email',
-            'address' => 'Address',
-            'custom_field' => 'Custom Field',
+            'first_name' => __('First Name', 'coinsnap-bitcoin-crowdfunding'),
+            'last_name' => __('Last Name', 'coinsnap-bitcoin-crowdfunding'),
+            'email' => __('Email', 'coinsnap-bitcoin-crowdfunding'),
+            'address' => __('Address', 'coinsnap-bitcoin-crowdfunding'),
+            'custom_field' => __('Custom Field', 'coinsnap-bitcoin-crowdfunding'),
         ];
 
         $field_values = [];
         foreach ($donor_fields as $field => $label) {
-            $field_values[$field] = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfundings_' . $field, true);
+            $field_values[$field] = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfunding_' . $field, true);
         }
 
 ?>
-        <script type="text/javascript">
-            jQuery(document).ready(function($) {
-                function toggleDonorFields() {
-                    if ($('input[name="coinsnap_bitcoin_crowdfundings_collect_donor_info"]').is(':checked')) {
-                        $('#donor-info-fields').show();
-                    } else {
-                        $('#donor-info-fields').hide();
-                    }
-                }
-
-                function toggleShoutoutShortcode() {
-                    if ($('input[name="coinsnap_bitcoin_crowdfundings_shoutout"]').is(':checked')) {
-                        $('#shoutout-shortcode-row').show();
-                    } else {
-                        $('#shoutout-shortcode-row').hide();
-                    }
-                }
-
-                $('input[name="coinsnap_bitcoin_crowdfundings_collect_donor_info"]').change(toggleDonorFields);
-                $('input[name="coinsnap_bitcoin_crowdfundings_shoutout"]').change(toggleShoutoutShortcode);
-
-                toggleDonorFields();
-                toggleShoutoutShortcode();
-            });
-        </script>
-
         <table class="form-table">
             <tr>
-                <th scope="row">Active</th>
+                <th scope="row"><?php echo esc_html_e('Active', 'coinsnap-bitcoin-crowdfunding'); ?></th>
                 <td>
                     <label>
                         <input
                             type="checkbox"
-                            name="coinsnap_bitcoin_crowdfundings_active"
+                            name="coinsnap_bitcoin_crowdfunding_active"
                             value="1"
                             <?php checked($active, '1'); ?>>
-                        Enable
+                        <?php echo esc_html_e('Enable', 'coinsnap-bitcoin-crowdfunding'); ?>
                     </label>
                     <br>
                 </td>
             </tr>
             <tr>
                 <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfundings_description"><?php echo esc_html_e('Description', 'coinsnap-bitcoin-crowdfundings') ?></label>
+                    <label for="coinsnap_bitcoin_crowdfunding_description"><?php echo esc_html_e('Description', 'coinsnap-bitcoin-crowdfunding'); ?></label>
                 </th>
                 <td>
                     <textarea
-                        id="coinsnap_bitcoin_crowdfundings_description"
-                        name="coinsnap_bitcoin_crowdfundings_description"
+                        id="coinsnap_bitcoin_crowdfunding_description"
+                        name="coinsnap_bitcoin_crowdfunding_description"
                         class="regular-text"
                         rows="2"
                         required
@@ -223,13 +197,13 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
                 </td>
             </tr>
             <th scope="row">
-                <label for="coinsnap_bitcoin_crowdfundings_amount"><?php echo esc_html_e('Goal Amount (in satoshis)', 'coinsnap-bitcoin-crowdfundings') ?></label>
+                <label for="coinsnap_bitcoin_crowdfunding_amount"><?php echo esc_html_e('Goal Amount (in satoshis)', 'coinsnap-bitcoin-crowdfunding') ?></label>
             </th>
             <td>
                 <input
                     type="number"
-                    id="coinsnap_bitcoin_crowdfundings_amount"
-                    name="coinsnap_bitcoin_crowdfundings_amount"
+                    id="coinsnap_bitcoin_crowdfunding_amount"
+                    name="coinsnap_bitcoin_crowdfunding_amount"
                     class="regular-text"
                     required
                     value="<?php echo esc_attr($amount); ?>"
@@ -239,12 +213,12 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
             </tr>
             <tr>
                 <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfundings_thank_you_message"><?php echo esc_html_e('Thank You Message', 'coinsnap-bitcoin-crowdfundings') ?></label>
+                    <label for="coinsnap_bitcoin_crowdfunding_thank_you_message"><?php echo esc_html_e('Thank You Message', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <textarea
-                        id="coinsnap_bitcoin_crowdfundings_thank_you_message"
-                        name="coinsnap_bitcoin_crowdfundings_thank_you_message"
+                        id="coinsnap_bitcoin_crowdfunding_thank_you_message"
+                        name="coinsnap_bitcoin_crowdfunding_thank_you_message"
                         class="regular-text"
                         rows="2"
                         required
@@ -254,12 +228,12 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
             </tr>
             <tr>
                 <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfundings_default_currency"><?php echo esc_html_e('Default Currency', 'coinsnap-bitcoin-crowdfundings') ?></label>
+                    <label for="coinsnap_bitcoin_crowdfunding_default_currency"><?php echo esc_html_e('Default Currency', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <select
-                        id="coinsnap_bitcoin_crowdfundings_default_currency"
-                        name="coinsnap_bitcoin_crowdfundings_default_currency"
+                        id="coinsnap_bitcoin_crowdfunding_default_currency"
+                        name="coinsnap_bitcoin_crowdfunding_default_currency"
                         class="regular-text">
                         <option value="sats" <?php selected($default_currency, 'sats'); ?>>SATS</option>
                         <option value="EUR" <?php selected($default_currency, 'EUR'); ?>>EUR</option>
@@ -273,13 +247,13 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
             </tr>
             <tr>
                 <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfundings_default_value_1"><?php echo esc_html_e('Default Value 1 (sats)', 'coinsnap-bitcoin-crowdfundings') ?></label>
+                    <label for="coinsnap_bitcoin_crowdfunding_default_value_1"><?php echo esc_html_e('Default Value 1 (sats)', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <input
                         type="number"
-                        id="coinsnap_bitcoin_crowdfundings_default_value_1"
-                        name="coinsnap_bitcoin_crowdfundings_default_value_1"
+                        id="coinsnap_bitcoin_crowdfunding_default_value_1"
+                        name="coinsnap_bitcoin_crowdfunding_default_value_1"
                         class="regular-text"
                         value="<?php echo esc_attr($default_value_1); ?>"
                         min="0"
@@ -288,13 +262,13 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
             </tr>
             <tr>
                 <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfundings_default_value_2"><?php echo esc_html_e('Default Value 2 (sats)', 'coinsnap-bitcoin-crowdfundings') ?></label>
+                    <label for="coinsnap_bitcoin_crowdfunding_default_value_2"><?php echo esc_html_e('Default Value 2 (sats)', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <input
                         type="number"
-                        id="coinsnap_bitcoin_crowdfundings_default_value_2"
-                        name="coinsnap_bitcoin_crowdfundings_default_value_2"
+                        id="coinsnap_bitcoin_crowdfunding_default_value_2"
+                        name="coinsnap_bitcoin_crowdfunding_default_value_2"
                         class="regular-text"
                         value="<?php echo esc_attr($default_value_2); ?>"
                         min="0"
@@ -303,13 +277,13 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
             </tr>
             <tr>
                 <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfundings_default_value_3"><?php echo esc_html_e('Default Value 3 (sats)', 'coinsnap-bitcoin-crowdfundings') ?></label>
+                    <label for="coinsnap_bitcoin_crowdfunding_default_value_3"><?php echo esc_html_e('Default Value 3 (sats)', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <input
                         type="number"
-                        id="coinsnap_bitcoin_crowdfundings_default_value_3"
-                        name="coinsnap_bitcoin_crowdfundings_default_value_3"
+                        id="coinsnap_bitcoin_crowdfunding_default_value_3"
+                        name="coinsnap_bitcoin_crowdfunding_default_value_3"
                         class="regular-text"
                         value="<?php echo esc_attr($default_value_3); ?>"
                         min="0"
@@ -318,7 +292,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
             </tr>
             <tr>
                 <th scope="row">
-                    <label for="shortcode"><?php echo esc_html_e('Shortcode', 'coinsnap-bitcoin-crowdfundings') ?></label>
+                    <label for="shortcode"><?php echo esc_html_e('Shortcode', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <input
@@ -336,7 +310,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
                     <label>
                         <input
                             type="checkbox"
-                            name="coinsnap_bitcoin_crowdfundings_shoutout"
+                            name="coinsnap_bitcoin_crowdfunding_shoutout"
                             value="1"
                             <?php checked($shoutout, '1'); ?>>
                         Enable shoutout list
@@ -346,7 +320,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
             </tr>
             <tr id="shoutout-shortcode-row">
                 <th scope="row">
-                    <label for="shoutout-shortcode"><?php echo esc_html_e('Shoutout Shortcode', 'coinsnap-bitcoin-crowdfundings') ?></label>
+                    <label for="shoutout-shortcode"><?php echo esc_html_e('Shoutout Shortcode', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <input
@@ -364,7 +338,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
                     <label>
                         <input
                             type="checkbox"
-                            name="coinsnap_bitcoin_crowdfundings_collect_donor_info"
+                            name="coinsnap_bitcoin_crowdfunding_collect_donor_info"
                             value="1"
                             <?php checked($collect_donor_info, '1'); ?>>
                         Enable
@@ -379,12 +353,12 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
             <table class="form-table">
                 <?php
                 foreach ($donor_fields as $field => $label) {
-                    $visibility_value = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfundings_' . $field . '_visibility', true) ?: 'optional';
+                    $visibility_value = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfunding_' . $field . '_visibility', true) ?: 'optional';
                 ?>
                     <tr>
                         <th scope="row"><?php echo esc_html($label); ?></th>
                         <td>
-                            <select name="coinsnap_bitcoin_crowdfundings_<?php echo esc_attr($field); ?>_visibility">
+                            <select name="coinsnap_bitcoin_crowdfunding_<?php echo esc_attr($field); ?>_visibility">
                                 <option value="mandatory" <?php selected($visibility_value, 'mandatory'); ?>>Mandatory</option>
                                 <option value="optional" <?php selected($visibility_value, 'optional'); ?>>Optional</option>
                                 <option value="hidden" <?php selected($visibility_value, 'hidden'); ?>>Hidden</option>
@@ -394,13 +368,13 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
                 <?php } ?>
                 <tr>
                     <th scope="row">
-                        <label for="coinsnap_bitcoin_crowdfundings_custom_field_name"><?php echo esc_html_e('Custom Field Name', 'coinsnap-bitcoin-crowdfundings') ?></label>
+                        <label for="coinsnap_bitcoin_crowdfunding_custom_field_name"><?php echo esc_html_e('Custom Field Name', 'coinsnap-bitcoin-crowdfunding') ?></label>
                     </th>
                     <td>
                         <input
                             type="text"
-                            id="coinsnap_bitcoin_crowdfundings_custom_field_name"
-                            name="coinsnap_bitcoin_crowdfundings_custom_field_name"
+                            id="coinsnap_bitcoin_crowdfunding_custom_field_name"
+                            name="coinsnap_bitcoin_crowdfunding_custom_field_name"
                             class="regular-text"
                             value="<?php echo esc_attr($custom_field_name); ?>">
                     </td>
@@ -419,10 +393,10 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
 
         if (defined('REST_REQUEST') && REST_REQUEST) {
             $expected_nonce = 'wp_rest';
-            $nonce = isset($_SERVER['HTTP_X_WP_NONCE']) ? sanitize_text_field($_SERVER['HTTP_X_WP_NONCE']) : '';
+            $nonce = (null !== filter_input(INPUT_SERVER,'HTTP_X_WP_NONCE',FILTER_SANITIZE_FULL_SPECIAL_CHARS))? sanitize_text_field(filter_input(INPUT_SERVER,'HTTP_X_WP_NONCE',FILTER_SANITIZE_FULL_SPECIAL_CHARS)) : '';
         } else {
-            $expected_nonce = 'coinsnap_bitcoin_crowdfundings_nonce';
-            $nonce = filter_input(INPUT_POST, $expected_nonce, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $expected_nonce = 'coinsnap_bitcoin_crowdfunding_nonce';
+            $nonce = filter_input(INPUT_POST, 'coinsnap_bitcoin_crowdfunding_nonce', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         }
         if (empty($nonce) || !wp_verify_nonce($nonce, $expected_nonce)) {
             return;
@@ -432,33 +406,35 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
             return;
         }
 
-        if ($post->post_type !== 'bitcoin-cfs') {
+        if ($post->post_type !== 'coinsnap-cfs') {
             return;
         }
 
         $fields = [
-            'coinsnap_bitcoin_crowdfundings_description' => 'text',
-            'coinsnap_bitcoin_crowdfundings_amount'      => 'number',
-            'coinsnap_bitcoin_crowdfundings_thank_you_message' => 'text',
-            'coinsnap_bitcoin_crowdfundings_active'      => 'boolean',
-            'coinsnap_bitcoin_crowdfundings_collect_donor_info' => 'boolean',
-            'coinsnap_bitcoin_crowdfundings_default_value_1' => 'number',
-            'coinsnap_bitcoin_crowdfundings_default_value_2' => 'number',
-            'coinsnap_bitcoin_crowdfundings_default_value_3' => 'number',
-            'coinsnap_bitcoin_crowdfundings_custom_field_name' => 'text',
-            'coinsnap_bitcoin_crowdfundings_default_currency' => 'text',
-            'coinsnap_bitcoin_crowdfundings_shoutout' => 'boolean',
+            'coinsnap_bitcoin_crowdfunding_description' => 'text',
+            'coinsnap_bitcoin_crowdfunding_amount'      => 'number',
+            'coinsnap_bitcoin_crowdfunding_thank_you_message' => 'text',
+            'coinsnap_bitcoin_crowdfunding_active'      => 'boolean',
+            'coinsnap_bitcoin_crowdfunding_collect_donor_info' => 'boolean',
+            'coinsnap_bitcoin_crowdfunding_default_value_1' => 'number',
+            'coinsnap_bitcoin_crowdfunding_default_value_2' => 'number',
+            'coinsnap_bitcoin_crowdfunding_default_value_3' => 'number',
+            'coinsnap_bitcoin_crowdfunding_custom_field_name' => 'text',
+            'coinsnap_bitcoin_crowdfunding_default_currency' => 'text',
+            'coinsnap_bitcoin_crowdfunding_shoutout' => 'boolean',
         ];
 
         if (!defined('REST_REQUEST') || !REST_REQUEST) {
             $required_fields = [
-                'coinsnap_bitcoin_crowdfundings_description',
-                'coinsnap_bitcoin_crowdfundings_amount'
+                'coinsnap_bitcoin_crowdfunding_description',
+                'coinsnap_bitcoin_crowdfunding_amount'
             ];
 
             foreach ($required_fields as $field) {
                 if (empty($_POST[$field])) {
-                    wp_die("Error: $field is required.");
+                    wp_die(sprintf( 
+                        /* translators: 1: Error: field is required */
+                        esc_html__( 'Error: %1$s is required.', 'coinsnap-bitcoin-crowdfunding' ), esc_html($field)));
                 }
             }
         } else {
@@ -467,8 +443,8 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
 
             if (isset($data['meta']) && is_array($data['meta'])) {
                 $required_meta_fields = [
-                    '_coinsnap_bitcoin_crowdfundings_description',
-                    '_coinsnap_bitcoin_crowdfundings_amount'
+                    '_coinsnap_bitcoin_crowdfunding_description',
+                    '_coinsnap_bitcoin_crowdfunding_amount'
                 ];
 
                 foreach ($required_meta_fields as $field) {
@@ -504,11 +480,11 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
 
         foreach ($fields as $field => $type) {
             if ($type === 'boolean') {
-                $value = isset($_POST[$field]) ? '1' : '';
+                $value = (filter_input(INPUT_POST,$field,FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null) ? '1' : '';
                 update_post_meta($post_id, '_' . $field, $value);
             } else {
-                if (isset($_POST[$field])) {
-                    $value = $_POST[$field];
+                if (filter_input(INPUT_POST,$field,FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null){
+                    $value = filter_input(INPUT_POST,$field,FILTER_SANITIZE_FULL_SPECIAL_CHARS);
                     if ($type === 'number') {
                         $value = floatval($value);
                     } else {
@@ -521,9 +497,9 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
 
         $donor_fields = ['first_name', 'last_name', 'email', 'address', 'custom_field'];
         foreach ($donor_fields as $field) {
-            $visibility_field = 'coinsnap_bitcoin_crowdfundings_' . $field . '_visibility';
+            $visibility_field = 'coinsnap_bitcoin_crowdfunding_' . $field . '_visibility';
             if (isset($_POST[$visibility_field])) {
-                $value = sanitize_text_field($_POST[$visibility_field]);
+                $value = sanitize_text_field(filter_input(INPUT_POST,$visibility_field,FILTER_SANITIZE_FULL_SPECIAL_CHARS));
                 update_post_meta($post_id, '_' . $visibility_field, $value);
             }
         }
@@ -548,17 +524,17 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
     {
         switch ($column) {
             case 'description':
-                echo esc_html(get_post_meta($post_id, '_coinsnap_bitcoin_crowdfundings_description', true) ?: '');
+                echo esc_html(get_post_meta($post_id, '_coinsnap_bitcoin_crowdfunding_description', true) ?: '');
                 break;
             case 'amount':
-                $amount = get_post_meta($post_id, '_coinsnap_bitcoin_crowdfundings_amount', true);
+                $amount = get_post_meta($post_id, '_coinsnap_bitcoin_crowdfunding_amount', true);
                 echo esc_html($amount ?: '0');
                 break;
             case 'thank_you_message':
-                echo esc_html(get_post_meta($post_id, '_coinsnap_bitcoin_crowdfundings_thank_you_message', true) ?: '');
+                echo esc_html(get_post_meta($post_id, '_coinsnap_bitcoin_crowdfunding_thank_you_message', true) ?: '');
                 break;
             case 'active':
-                echo get_post_meta($post_id, '_coinsnap_bitcoin_crowdfundings_active', true) ? '✓' : '✗';
+                echo get_post_meta($post_id, '_coinsnap_bitcoin_crowdfunding_active', true) ? '✓' : '✗';
                 break;
             case 'shortcode':
                 echo '[bitcoin_crowdfunding id="' . esc_html($post_id) . '"]';
