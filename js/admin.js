@@ -255,6 +255,9 @@
     });
     
 <<<<<<< Updated upstream:js/admin.js
+<<<<<<< Updated upstream:js/admin.js
+>>>>>>> Stashed changes:assets/js/admin.js
+=======
 >>>>>>> Stashed changes:assets/js/admin.js
 =======
 >>>>>>> Stashed changes:assets/js/admin.js

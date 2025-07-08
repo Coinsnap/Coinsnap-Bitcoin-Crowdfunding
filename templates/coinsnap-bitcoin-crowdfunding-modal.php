@@ -130,7 +130,11 @@
         </details>
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         <button id="<?php echo esc_html($prefix); ?>pay-in-wallet<?php echo esc_html($sufix); ?>" class="qr-pay-in-wallet">Pay in wallet</button>
+=======
+        <a id="<?php echo esc_html($prefix);?>pay-in-wallet<?php echo esc_html($sufix); ?>" class="qr-pay-in-wallet"><?php echo esc_html_e('Pay in wallet', 'coinsnap-bitcoin-crowdfunding');?></a>
+>>>>>>> Stashed changes
 =======
         <a id="<?php echo esc_html($prefix);?>pay-in-wallet<?php echo esc_html($sufix); ?>" class="qr-pay-in-wallet"><?php echo esc_html_e('Pay in wallet', 'coinsnap-bitcoin-crowdfunding');?></a>
 >>>>>>> Stashed changes
