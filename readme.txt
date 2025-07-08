@@ -1,7 +1,7 @@
 === Coinsnap Bitcoin Crowdfunding ===
 
 Contributors: coinsnap
-Tags: Lightning, SATS, bitcoin, crowdfunding, fundraising, BTCPay
+Tags: Lightning, bitcoin, crowdfunding, fundraising, BTCPay
 Tested up to: 6.8
 Stable tag: 1.0.0
 License: GPL2

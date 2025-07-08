@@ -1,6 +1,7 @@
 <?php
-class Coinsnap_Bitcoin_Crowdfunding_Webhooks
-{
+if (!defined('ABSPATH')){ exit; }
+
+class Coinsnap_Bitcoin_Crowdfunding_Webhooks {
 
     public function __construct()
     {
@@ -87,12 +88,12 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks
         $poll_id = $request['poll_id'];
 
         global $wpdb;
-
-        $query = $wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}crowdfunding_payments WHERE status = 'completed' AND poll_id = %d",
-            $poll_id
-        );
-        $results = $wpdb->get_results($query);
+        $tab_name = "{$wpdb->prefix}crowdfunding_payments";
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM %i WHERE status = 'completed' AND poll_id = %d",
+            $tab_name, $poll_id
+        ));
 
         return ['results' => $results];
     }
@@ -106,16 +107,15 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks
 
         while (time() - $start_time < $timeout) {
             global $wpdb;
+            $table_name = $wpdb->prefix."crowdfunding_payments";
+            
             $status = $wpdb->get_var($wpdb->prepare(
-                "SELECT status FROM {$wpdb->prefix}crowdfunding_payments WHERE payment_id = %s",
-                $payment_id
+                "SELECT status FROM %i WHERE payment_id = %s",$table_name,$payment_id
             ));
             if ($status === 'completed') {
-                $query = $wpdb->prepare(
-                    "SELECT * FROM {$wpdb->prefix}crowdfunding_payments WHERE status = 'completed' AND poll_id = %d",
-                    $poll_id
-                );
-                $results = $wpdb->get_results($query);
+                $results = $wpdb->get_results($wpdb->prepare(
+                    "SELECT * FROM %i WHERE status = 'completed' AND poll_id = %d",$table_name,$poll_id
+                ));
 
                 return ['status' => 'completed', 'results' => $results];
             }
@@ -195,7 +195,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks
         $payload_data = $request->get_json_params();
 
         if (isset($payload_data['type']) && ($payload_data['type'] === 'Settled' || $payload_data['type'] === 'InvoiceSettled')) {
-            error_log('Webhook received: ' . json_encode($payload_data));
+            //error_log('Webhook received: ' . json_encode($payload_data));
             // Crowdfunding
             if (isset($payload_data['metadata']['type']) && $payload_data['metadata']['type'] == "Bitcoin Crowdfunding") {
                 global $wpdb;
@@ -253,7 +253,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks
                     $post_data = array(
                         'post_title'    => $name,
                         'post_status'   => 'publish',
-                        'post_type'     => 'crowdfunding-pds',
+                        'post_type'     => 'coinsnap-cf-donors',
                         'post_content'  => $message
                     );
 

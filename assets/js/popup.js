@@ -1,5 +1,5 @@
 // js/popup.js
-const checkRequiredFieds = (fields) => {
+const checkCFRequiredFieds = (fields) => {
     let valid = true;
     fields.forEach((field) => {
         if (field && field.required && !field.value.trim()) {
@@ -83,7 +83,7 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
         const customField = document.getElementById(`${prefix}custom${sufix}`);
         const customNameField = document.getElementById(`${prefix}custom-name${sufix}`);
         const customContent = customNameField?.textContent && customField?.value ? `${customNameField.textContent}: ${customField.value}` : ''
-        const validForm = !publicDonor || checkRequiredFieds([firstNameField, lastNameField, emailField, streetField, houseNumberField, postalCodeField, cityField, countryField, customField]);
+        const validForm = !publicDonor || checkCFRequiredFieds([firstNameField, lastNameField, emailField, streetField, houseNumberField, postalCodeField, cityField, countryField, customField]);
         const publicName = document.getElementById(`${prefix}public-name${sufix}`);
         const publicMessage = document.getElementById(`${prefix}public-message${sufix}`);
         const crowdfundName = document.getElementById('bitcoin-crowdfunding-form').dataset.name || '';

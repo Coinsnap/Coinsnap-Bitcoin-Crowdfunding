@@ -1,8 +1,6 @@
 <?php
-
-if (!defined('WP_UNINSTALL_PLUGIN')) {
-    exit;
-}
+if (!defined('ABSPATH')){ exit; }
+if (!defined('WP_UNINSTALL_PLUGIN')) { exit; }
 
 global $wpdb;
 $tables = array(
@@ -10,7 +8,7 @@ $tables = array(
 );
 
 foreach ($tables as $table) {
-    $wpdb->query("DROP TABLE IF EXISTS $table");
+    $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %s",$table));
 }
 
 $options = array(

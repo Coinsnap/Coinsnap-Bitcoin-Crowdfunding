@@ -205,8 +205,6 @@
         ? checkConnection.css({ color: 'green' }).text('Connection successful')
         : checkConnection.css({ color: 'red' }).text('Connection failed');
     }
-<<<<<<< Updated upstream:js/admin.js
-=======
     
     //  Crownfunding list
     function toggleDonorFields() {
@@ -254,13 +252,6 @@
         }
     });
     
-<<<<<<< Updated upstream:js/admin.js
-<<<<<<< Updated upstream:js/admin.js
->>>>>>> Stashed changes:assets/js/admin.js
-=======
->>>>>>> Stashed changes:assets/js/admin.js
-=======
->>>>>>> Stashed changes:assets/js/admin.js
   });
   
   function isCrowdfundingValidUrl(serverUrl) {

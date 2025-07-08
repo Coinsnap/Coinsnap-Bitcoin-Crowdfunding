@@ -18,7 +18,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Shoutouts_List
 
         $crowdfunding_id = intval($atts['id']);
         // Check if crowdfunding_id is valid and post exists
-        if (!$crowdfunding_id || get_post_type($crowdfunding_id) !== 'bitcoin-cfs') {
+        if (!$crowdfunding_id || get_post_type($crowdfunding_id) !== 'coinsnap-cfs') {
             return '<p>Invalid or missing crowdfunding ID.</p>';
         }
 
@@ -26,20 +26,21 @@ class Coinsnap_Bitcoin_Crowdfunding_Shoutouts_List
 
         $theme_class = $options_general['theme'] === 'dark' ? 'coinsnap-bitcoin-crowdfunding-dark-theme' : 'coinsnap-bitcoin-crowdfunding-light-theme';
         $active = get_post_meta($crowdfunding_id, '_coinsnap_bitcoin_crowdfundings_shoutout', true);
-        error_log('Active: ' . $active);
+        //error_log('Active: ' . $active);
         global $wpdb;
         $table_name = $wpdb->prefix . 'crowdfunding_payments';
 
         // Fetch payments with public name and message
-        $results = $wpdb->get_results(
-            "SELECT * FROM $table_name 
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM %i
             WHERE name IS NOT NULL 
             AND message IS NOT NULL 
             AND name != '' 
-            AND crowdfunding_id = $crowdfunding_id
-            ORDER BY created_at DESC",
+            AND crowdfunding_id = %d
+            ORDER BY created_at DESC", $table_name, $crowdfunding_id ),
             ARRAY_A
         );
+        
         $shoutouts = array();
 
         if (!empty($results)) {
