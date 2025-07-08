@@ -219,6 +219,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
 
         add_settings_field(
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             'btcpay_url',
             'BTCPay URL',
             [$this, 'render_field'],
@@ -230,6 +231,8 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
             ]
         );
         add_settings_field(
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
             'check_connection_btcpay',

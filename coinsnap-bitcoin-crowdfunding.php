@@ -156,6 +156,7 @@ class Coinsnap_Bitcoin_Crowdfunding
     {
         if ($hook === 'bitcoin-crowdfunding_page_coinsnap-bitcoin-crowdfunding-donation-list') {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             wp_enqueue_style('coinsnap-bitcoin-crowdfunding-admin-style', plugin_dir_url(__FILE__) . 'styles/admin-style.css', [], '1.0.0');
         } else if ($hook === 'toplevel_page_coinsnap_bitcoin_crowdfunding') {
             wp_enqueue_style('coinsnap-bitcoin-crowdfunding-admin-style', plugin_dir_url(__FILE__) . 'styles/admin-style.css', [], '1.0.0');
@@ -164,6 +165,8 @@ class Coinsnap_Bitcoin_Crowdfunding
             wp_enqueue_script('coinsnap-bitcoin-crowdfunding-admin-script', plugin_dir_url(__FILE__) . 'js/admin.js', ['jquery'], '1.0.0', true);
             wp_localize_script('coinsnap-bitcoin-crowdfunding-admin-script', 'adminData', ['ngrokUrl' => $ngrok_url]);
 =======
+=======
+>>>>>>> Stashed changes
             wp_enqueue_style('coinsnap-bitcoin-crowdfunding-admin-style', plugin_dir_url(__FILE__) . 'assets/css/admin-style.css', [], COINSNAP_BITCOIN_CROWDFUNDING_VERSION);
         }
         else {
