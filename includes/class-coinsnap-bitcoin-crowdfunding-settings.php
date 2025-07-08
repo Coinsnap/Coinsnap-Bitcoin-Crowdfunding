@@ -178,6 +178,20 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
             [$this, 'btcpay_section_callback'],
             'coinsnap_bitcoin_crowdfunding'
         );
+        
+        add_settings_field(
+            'btcpay_url',
+            'BTCPay URL',
+            [$this, 'render_field'],
+            'coinsnap-bitcoin-crowdfunding',
+            'coinsnap_bitcoin_crowdfunding_btcpay_section',
+            [
+                'label_for' => 'btcpay_url',
+                'type'      => 'text',
+                'description' => '<button class="button btcpay-apikey-link" type="button" id="coinsnap_bitcoin_crowdfunding_btcpay_wizard_button" target="_blank">'. esc_html__('Generate API key','coinsnap-bitcoin-crowdfunding') .'</button>'
+            ]
+        );
+        
 
         add_settings_field(
             'btcpay_store_id',
@@ -204,6 +218,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
         );
 
         add_settings_field(
+<<<<<<< Updated upstream
             'btcpay_url',
             'BTCPay URL',
             [$this, 'render_field'],
@@ -215,6 +230,8 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
             ]
         );
         add_settings_field(
+=======
+>>>>>>> Stashed changes
             'check_connection_btcpay',
             'Check Connection',
             [$this, 'render_field'],
@@ -439,8 +456,12 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
                 break;
         }
 
-        if (isset($args['description'])) {
-            echo '<p class="description">' . esc_html($args['description']) . '</p>';
+        if (isset($args['description']) && !empty($args['description'])) {
+            echo '<p class="description">' . wp_kses($args['description'],[
+                'a' => ['href'  => true,'title' => true,'class' => true], 
+                'b' => [], 
+                'button' => ['class' => true,'type' => true, 'id' => true, 'target' => true]
+                ]) . '</p>';
         }
     }
 

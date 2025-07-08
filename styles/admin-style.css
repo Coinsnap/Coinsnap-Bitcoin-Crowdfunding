@@ -3,6 +3,8 @@
   margin-bottom: 20px;
 }
 
+.button.btcpay-apikey-link {margin:10px 0;}
+
 .coinsnap-bitcoin-crowdfunding-settings-form input[type="text"],
 .coinsnap-bitcoin-crowdfunding-settings-form select {
   width: 100%;

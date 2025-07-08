@@ -144,11 +144,15 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
             // Add fiat amount
             if (exchangeRates['EUR']) {
                 document.getElementById(`${prefix}qr-fiat${sufix}`).textContent = `≈ ${(res.amount * exchangeRates['EUR'])?.toFixed(3)} EUR`;
+                document.getElementById(`${prefix}pay-in-wallet${sufix}`).setAttribute('href', `lightning:${qrLightning}`);
+                
+                //  Browser doesn't know how to redirect to unknown protocol
+                //  Store the handler function when adding the listener
                 // Store the handler function when adding the listener
-                walletHandler = function () {
-                    window.location.href = `lightning:${qrLightning}`;
-                };
-                document.getElementById(`${prefix}pay-in-wallet${sufix}`).addEventListener('click', walletHandler);
+                //walletHandler = function () {
+                //    window.location.href = `lightning:${qrLightning}`;
+                //};
+                //document.getElementById(`${prefix}pay-in-wallet${sufix}`).addEventListener('click', walletHandler);
             }
 
             // Reset retry counter
