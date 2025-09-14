@@ -77,9 +77,9 @@ class Coinsnap_Bitcoin_Crowdfunding_Donation_List {
 		<div class="wrap">
 			<h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 			<?php if ($provider === 'coinsnap'): ?>
-				<h4>Check <a href="https://app.coinsnap.io/transactions" target="_blank" rel="noopener noreferrer">Coinsnap app</a> for a detailed overview</h4>
+				<h4><?php echo esc_html__('Check','coinsnap-bitcoin-crowdfunding');?> <a href="https://app.coinsnap.io/transactions" target="_blank" rel="noopener noreferrer">Coinsnap app</a> <?php echo esc_html__('for a detailed overview','coinsnap-bitcoin-crowdfunding');?></h4>
 			<?php elseif ($provider === 'btcpay'): ?>
-				<h4>Check <a href="<?php echo esc_html($btcpay_href); ?>" target="_blank" rel="noopener noreferrer">BtcPay server</a> for a detailed overview</h4>
+				<h4><?php echo esc_html__('Check','coinsnap-bitcoin-crowdfunding');?> <a href="<?php echo esc_html($btcpay_href); ?>" target="_blank" rel="noopener noreferrer">BtcPay server</a> <?php echo esc_html__('for a detailed overview','coinsnap-bitcoin-crowdfunding');?></h4>
 			<?php else: ?>
 				<p><?php echo esc_html__('Provider not recognized.','coinsnap-bitcoin-crowdfunding');?></p>
 			<?php endif; ?>

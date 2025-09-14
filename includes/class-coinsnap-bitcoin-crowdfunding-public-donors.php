@@ -19,17 +19,17 @@ class Coinsnap_Bitcoin_Crowdfunding_Public_Donors
     {
         register_post_type('coinsnap-cf-donors', [
             'labels' => [
-                'name'               => 'Donor Information',
-                'singular_name'      => 'Donor Information',
-                'menu_name'          => 'Donor Information',
-                'add_new'            => 'Add New',
-                'add_new_item'       => 'Add New Donor',
-                'edit_item'          => 'Edit Donor',
-                'new_item'           => 'New Donor',
-                'view_item'          => 'View Donor',
-                'search_items'       => 'Search Donors',
-                'not_found'          => 'No donors found',
-                'not_found_in_trash' => 'No donors found in Trash',
+                'name'               => __('Donor Information', 'coinsnap-bitcoin-crowdfunding'),
+                'singular_name'      => __('Donor Information', 'coinsnap-bitcoin-crowdfunding'),
+                'menu_name'          => __('Donor Information', 'coinsnap-bitcoin-crowdfunding'),
+                'add_new'            => __('Add New', 'coinsnap-bitcoin-crowdfunding'),
+                'add_new_item'       => __('Add New Donor', 'coinsnap-bitcoin-crowdfunding'),
+                'edit_item'          => __('Edit Donor', 'coinsnap-bitcoin-crowdfunding'),
+                'new_item'           => __('New Donor', 'coinsnap-bitcoin-crowdfunding'),
+                'view_item'          => __('View Donor', 'coinsnap-bitcoin-crowdfunding'),
+                'search_items'       => __('Search Donors', 'coinsnap-bitcoin-crowdfunding'),
+                'not_found'          => __('No donors found', 'coinsnap-bitcoin-crowdfunding'),
+                'not_found_in_trash' => __('No donors found in Trash', 'coinsnap-bitcoin-crowdfunding'),
             ],
             'public'             => false,
             'publicly_queryable' => false,
@@ -132,7 +132,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Public_Donors
         <table class="form-table">
             <tr>
                 <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfunding_donor_name"><?php echo esc_html_e('Name', 'coinsnap-bitcoin-crowdfunding') ?></label>
+                    <label for="coinsnap_bitcoin_crowdfunding_donor_name"><?php echo esc_html__('Name', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <input type="text" id="coinsnap_bitcoin_crowdfunding_donor_name" name="coinsnap_bitcoin_crowdfunding_donor_name" class="regular-text" value="<?php echo esc_attr($name); ?>" readonly>
@@ -140,7 +140,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Public_Donors
             </tr>
             <tr>
                 <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfunding_amount"><?php echo esc_html_e('Amount', 'coinsnap-bitcoin-crowdfunding') ?></label>
+                    <label for="coinsnap_bitcoin_crowdfunding_amount"><?php echo esc_html__('Amount', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <input type="text" id="coinsnap_bitcoin_crowdfunding_amount" name="coinsnap_bitcoin_crowdfunding_amount" class="regular-text" value="<?php echo esc_attr($amount); ?>" readonly>
@@ -148,7 +148,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Public_Donors
             </tr>
             <tr>
                 <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfunding_message"><?php echo esc_html_e('Message', 'coinsnap-bitcoin-crowdfunding') ?></label>
+                    <label for="coinsnap_bitcoin_crowdfunding_message"><?php echo esc_html__('Message', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <textarea id="coinsnap_bitcoin_crowdfunding_message" name="coinsnap_bitcoin_crowdfunding_message" class="regular-text" rows="3" readonly><?php echo esc_textarea($message); ?></textarea>
@@ -156,7 +156,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Public_Donors
             </tr>
             <tr>
                 <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfunding_form_type"><?php echo esc_html_e('Form Type', 'coinsnap-bitcoin-crowdfunding') ?></label>
+                    <label for="coinsnap_bitcoin_crowdfunding_form_type"><?php echo esc_html__('Form Type', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <input type="text" id="coinsnap_bitcoin_crowdfunding_form_type" name="coinsnap_bitcoin_crowdfunding_form_type" class="regular-text" value="<?php echo esc_attr($form_type); ?>" readonly>
@@ -164,7 +164,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Public_Donors
             </tr>
             <tr>
                 <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfunding_email"><?php echo esc_html_e('Email', 'coinsnap-bitcoin-crowdfunding') ?></label>
+                    <label for="coinsnap_bitcoin_crowdfunding_email"><?php echo esc_html__('Email', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <input type="email" id="coinsnap_bitcoin_crowdfunding_email" name="coinsnap_bitcoin_crowdfunding_email" class="regular-text" value="<?php echo esc_attr($email); ?>" readonly>
@@ -172,7 +172,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Public_Donors
             </tr>
             <tr>
                 <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfunding_address"><?php echo esc_html_e('Address', 'coinsnap-bitcoin-crowdfunding') ?></label>
+                    <label for="coinsnap_bitcoin_crowdfunding_address"><?php echo esc_html__('Address', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <input type="text" id="coinsnap_bitcoin_crowdfunding_address" name="coinsnap_bitcoin_crowdfunding_address" class="regular-text" value="<?php echo esc_attr($address); ?>" readonly>
@@ -180,7 +180,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Public_Donors
             </tr>
             <tr>
                 <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfunding_payment_id"><?php echo esc_html_e('Payment ID', 'coinsnap-bitcoin-crowdfunding') ?></label>
+                    <label for="coinsnap_bitcoin_crowdfunding_payment_id"><?php echo esc_html__('Payment ID', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <input type="text" id="coinsnap_bitcoin_crowdfunding_payment_id" name="coinsnap_bitcoin_crowdfunding_payment_id" class="regular-text" value="<?php echo esc_attr($payment_id); ?>" readonly>
@@ -188,7 +188,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Public_Donors
             </tr>
             <tr>
                 <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfunding_custom_field"><?php echo esc_html_e('Custom Field', 'coinsnap-bitcoin-crowdfunding') ?></label>
+                    <label for="coinsnap_bitcoin_crowdfunding_custom_field"><?php echo esc_html__('Custom Field', 'coinsnap-bitcoin-crowdfunding') ?></label>
                 </th>
                 <td>
                     <input type="text" id="coinsnap_bitcoin_crowdfunding_custom_field" name="coinsnap_bitcoin_crowdfunding_custom_field" class="regular-text" value="<?php echo esc_attr($custom_field); ?>" readonly>
@@ -238,14 +238,14 @@ class Coinsnap_Bitcoin_Crowdfunding_Public_Donors
         return [
             'cb' => $columns['cb'],
             'title' => $columns['title'],
-            'name' => 'Name',
-            'email' => 'Email',
-            'amount' => 'Amount',
-            'message' => 'Message',
-            'address' => 'Address',
-            'payment_id' => 'Payment ID',
-            'form_type' => 'Form Type',
-            'custom_field' => 'Custom Field'
+            'name' => __('Name', 'coinsnap-bitcoin-crowdfunding'),
+            'email' => __('Email', 'coinsnap-bitcoin-crowdfunding'),
+            'amount' => __('Amount', 'coinsnap-bitcoin-crowdfunding'),
+            'message' => __('Message', 'coinsnap-bitcoin-crowdfunding'),
+            'address' => __('Address', 'coinsnap-bitcoin-crowdfunding'),
+            'payment_id' => __('Payment ID', 'coinsnap-bitcoin-crowdfunding'),
+            'form_type' => __('Form Type', 'coinsnap-bitcoin-crowdfunding'),
+            'custom_field' => __('Custom Field', 'coinsnap-bitcoin-crowdfunding')
         ];
     }
 

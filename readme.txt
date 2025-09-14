@@ -3,7 +3,7 @@
 Contributors: coinsnap
 Tags: Lightning, bitcoin, crowdfunding, fundraising, BTCPay
 Tested up to: 6.8
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -176,3 +176,11 @@ Plugin's page on Coinsnap website: [https://coinsnap.io/coinsnap-bitcoin-crowdfu
 
 = 1.0.0 :: 2025-06-19 =
 * Initial release.
+
+= 1.1.0 :: 2025-09-14 =
+* Update: Added payment gateway client class. 
+* Update: Added support for all the Coinsnap currencies instead of SATS only
+* Update: Prevented redirect to payment gateway if payment amount is less than 1 SAT or currency in not supported by Coinsnap.
+* Update: Prevented redirect to BTCPay server if payment amount is less than 0.000005869 BTC (0.50 EUR) for onchain payments, 0.000001 BTC (1 SAT) for Lightning payment or currency is not supported.
+* Update: Minimum order amount is added to connection status notice.
+* Fixed: Donation amount can be saved in SATS

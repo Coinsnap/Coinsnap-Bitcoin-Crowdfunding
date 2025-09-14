@@ -19,7 +19,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Shoutouts_List
         $crowdfunding_id = intval($atts['id']);
         // Check if crowdfunding_id is valid and post exists
         if (!$crowdfunding_id || get_post_type($crowdfunding_id) !== 'coinsnap-cfs') {
-            return '<p>Invalid or missing crowdfunding ID.</p>';
+            return '<p>'.__('Invalid or missing crowdfunding ID','coinsnap-bitcoin-crowdfunding').'</p>';
         }
 
         $options_general = get_option('coinsnap_bitcoin_crowdfunding_options');
@@ -64,7 +64,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Shoutouts_List
                     if (empty($shoutouts)) {
                         $this->render_empty_donation_row($theme_class);
                     } else {
-                        foreach ($shoutouts as $shoutout) {
+                        foreach($shoutouts as $shoutout) {
                             $this->render_donation_row($shoutout, $theme_class);
                         }
                     }
@@ -73,8 +73,8 @@ class Coinsnap_Bitcoin_Crowdfunding_Shoutouts_List
                     <div class="coinsnap-bitcoin-crowdfunding-form <?php echo esc_attr($theme_class); ?>">
                         <div class="shoutout-form-wrapper"
                             style="display: flex;justify-content: center; flex-direction: column; align-items: center; margin: 0">
-                            <h3>Shoutouts List</h3>
-                            <h4 style="text-align: center;">This form is not active</h4>
+                            <h3><?php __('Shoutouts List','coinsnap-bitcoin-crowdfunding');?></h3>
+                            <h4 style="text-align: center;"><?php __('This form is not active','coinsnap-bitcoin-crowdfunding');?></h4>
                         </div>
                     </div>
                 <?php
@@ -89,14 +89,13 @@ class Coinsnap_Bitcoin_Crowdfunding_Shoutouts_List
         return ob_get_clean();
     }
 
-    private function render_empty_donation_row($theme)
-    {
+    private function render_empty_donation_row($theme){
 
         $highlight = false;
-        $name = "No Shoutouts Available";
-        $message = "There are no shoutouts yet. This is just an example of how they will be displayed once there are some available.";
+        $name = __("No Shoutouts Available",'coinsnap-bitcoin-crowdfunding');
+        $message = __("There are no shoutouts yet. This is just an example of how they will be displayed once there are some available.",'coinsnap-bitcoin-crowdfunding');
         $amount = "0 sats";
-        $daysAgo = "Today";
+        $daysAgo = __("Today",'coinsnap-bitcoin-crowdfunding');
     ?>
         <div class="coinsnap-bitcoin-crowdfunding-shoutout <?php echo esc_attr($theme); ?> <?php echo $highlight ? 'highlight-shoutout' : ''; ?>">
             <div class="coinsnap-bitcoin-crowdfunding-shoutout-top">
@@ -127,11 +126,11 @@ class Coinsnap_Bitcoin_Crowdfunding_Shoutouts_List
         $now = new DateTime();
         $interval = $donationDate->diff($now);
         if ($interval->days === 0) {
-            $daysAgo = 'Today';
+            $daysAgo = __('Today','coinsnap-bitcoin-crowdfunding');
         } elseif ($interval->days === 1) {
-            $daysAgo = '1 day ago';
+            $daysAgo = __('1 day ago','coinsnap-bitcoin-crowdfunding');
         } else {
-            $daysAgo = $interval->days . ' days ago';
+            $daysAgo = $interval->days . __(' days ago','coinsnap-bitcoin-crowdfunding');
         }
 
     ?>

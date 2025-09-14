@@ -967,3 +967,7 @@
   box-sizing: border-box;
   border-radius: 4px !important;
 }
+
+.crowdfunding-input-field.error {border: 1px solid #CC0000}
+
+.crowdfunding-field-error   {font-size:70%; color:#CC0000;}

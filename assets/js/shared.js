@@ -16,14 +16,25 @@ function setCookie(name, value, minutes) {
     document.cookie = name + "=" + value + ";" + expires + ";path=/";
 }
 
-const addErrorCrowdfundingField = (field) => {
-    field.css('border', '1px solid red');
-    removeCrowdfundingBorderOnFocus(field, field)
+const addErrorCrowdfundingField = (field,message) => {
+    field.classList.add('error');
+    if(message !== ''){
+        if(jQuery(field).next('.crowdfunding-field-error').length){
+            jQuery(field).next('.crowdfunding-field-error').html(message);
+        }
+        else {
+            jQuery(field).after('<span class="crowdfunding-field-error">'+message+'</span>');
+        }
+        
+    }
+    removeCrowdfundingBorderOnFocus(field, field);
 }
 
 const removeCrowdfundingBorderOnFocus = (field1, field2) => {
-    field1.on('focus', function () {
-        field2.css('border', '');
+    field1.addEventListener('focus', function () {
+        field2.classList.remove('error');
+        jQuery(field1).next('.crowdfunding-field-error').remove();
+        jQuery(field2).next('.crowdfunding-field-error').remove();
     })
 
 }
@@ -35,7 +46,7 @@ const handleCrowdfundingButtonClick = (buttonId, honeypotId, amountId, satoshiId
     button.disabled = true;
 
     const honeypot = document.getElementById(honeypotId);
-    if (honeypot && honeypot.value) {
+    if (honeypot && honeypot.value){
         return;
     }
 
@@ -52,9 +63,9 @@ const handleCrowdfundingButtonClick = (buttonId, honeypotId, amountId, satoshiId
 
     if (isNaN(fiatAmount) && isNaN(satsAmount)) {
         button.disabled = false;
-        addErrorCrowdfundingField(amountField);
+        addErrorCrowdfundingField(amountField,'');
         if (satoshiField) {
-            addErrorCrowdfundingField(satoshiField);
+            addErrorCrowdfundingField(satoshiField,'');
             removeCrowdfundingBorderOnFocus(satoshiField, amountField);
             removeCrowdfundingBorderOnFocus(amountField, satoshiField);
         }
@@ -69,7 +80,7 @@ const handleCrowdfundingButtonClick = (buttonId, honeypotId, amountId, satoshiId
 
     if (!isNaN(amount) && amount > 0) {
         const type = name ? 'Shoutout Donation' : 'Donation Button';
-        createCrowdfundingInvoice(amount, message, lastInputCurrency, name, type);
+        createCrowdfundingInvoice(amount, amountFiat, lastInputCurrency, message, name, type);
     } else {
         button.disabled = false;
     }
@@ -84,14 +95,14 @@ const handleCrowdfundingButtonClickMulti = (buttonId, honeypotId, amountId, mess
         event.preventDefault();
         return
     }
-    const amountField = document.getElementById(amountId)
-    const fiatAmount = cleanCrowdfundingAmount(amountField.value)
+    const amountField = document.getElementById(amountId);
+    const fiatAmount = cleanCrowdfundingAmount(amountField.value);
 
     if (!fiatAmount) {
         button.disabled = false;
-        addErrorCrowdfundingField(amountField)
+        addErrorCrowdfundingField(amountField,'');
         event.preventDefault();
-        return
+        return;
     }
 
     const messageField = document.getElementById(messageId)
@@ -99,7 +110,7 @@ const handleCrowdfundingButtonClickMulti = (buttonId, honeypotId, amountId, mess
     const currency = lastInputCurrency.toUpperCase()
     const amount = fiatAmount;
     if (amount) {
-        createCrowdfundingInvoice(amount, message, currency, name, 'Multi Amount Donation');
+        createCrowdfundingInvoice(amount, amountFiat, currency, message, name, 'Multi Amount Donation');
     }
 }
 
@@ -171,12 +182,12 @@ const createActualCrowdfundingInvoice = async (amount, message, lastInputCurrenc
             referralCode: 'D19833',
             type: type,
             name: name,
-            ...metadata //TEST with voting
+            ...metadata
         }
     };
 
-    if (type == 'Donation Crowdfunding') {
-        requestData.redirectUrl = sharedData?.redirectUrl || window.location.href
+    if (type === 'Donation Crowdfunding') {
+        requestData.redirectUrl = sharedData?.redirectUrl || window.location.href;
     }
     if (window.location.href.includes("localhost")) {
         requestData.redirectUrl = "https://coinsnap.io";
@@ -287,19 +298,19 @@ const checkCrowdfundingInvoiceStatus = async (invoiceId, amount, message, lastIn
             const url = `${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayUrl}/api/v1/stores/${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayStoreId}/invoices/${responseData.id}/payment-methods`;
             const response2 = await fetch(url, {
                 method: 'GET',
-                headers: headers,
+                headers: headers
             });
             const responseData2 = await response2.json();
-            const paymentLink = responseData2[0].paymentLink
-            console.log('Payment Link:', paymentLink)
-            responseData.lightningInvoice = paymentLink?.replace('lightning:', '')
-            responseData.onchainAddress = ''
+            const paymentLink = responseData2[0].paymentLink;
+            console.log('Payment Link:', paymentLink);
+            responseData.lightningInvoice = paymentLink?.replace('lightning:', '');
+            responseData.onchainAddress = '';
 
             // Generate QR code image from lightning invoice
             const qrCodeImage = await generateQRCodeDataURL(paymentLink);
             responseData.qrCodes = {
                 lightningQR: qrCodeImage || paymentLink
-            }
+            };
         }
 
         if (responseData?.status === 'Settled') {
@@ -308,7 +319,7 @@ const checkCrowdfundingInvoiceStatus = async (invoiceId, amount, message, lastIn
             if (redirect) {
                 window.location.href = responseData.checkoutLink;
             }
-            return responseData
+            return responseData;
         }
 
     } catch (error) {
@@ -317,17 +328,18 @@ const checkCrowdfundingInvoiceStatus = async (invoiceId, amount, message, lastIn
     }
 };
 
-const createCrowdfundingInvoice = async (amount, message, lastInputCurrency, name, type, redirect = true, metadata) => {
-    existingInvoice = getCookie('coinsnap_invoice_')
+const createCrowdfundingInvoice = async (amount, amountFiat, lastInputCurrency,  message, name, type, redirect = true, metadata) => {
+    existingInvoice = getCookie('coinsnap_invoice_');
+    lastInputCurrency = 'SATS';
     if (existingInvoice) {
-        invoiceJson = JSON.parse(existingInvoice)
+        invoiceJson = JSON.parse(existingInvoice);
         if (
             invoiceJson.id &&
             invoiceJson.checkoutLink &&
-            invoiceJson.amount == amount &&
-            invoiceJson.currency == lastInputCurrency &&
-            invoiceJson.message == message &&
-            invoiceJson.name == name
+            invoiceJson.amount === amount &&
+            invoiceJson.currency === lastInputCurrency &&
+            invoiceJson.message === message &&
+            invoiceJson.name === name
         ) {
             const cs = await checkCrowdfundingInvoiceStatus(
                 invoiceJson.id,
@@ -335,12 +347,12 @@ const createCrowdfundingInvoice = async (amount, message, lastInputCurrency, nam
                 message,
                 lastInputCurrency,
                 name,
-                Coinsnap_Bitcoin_Crowdfunding_sharedData.provider == 'coinsnap',
+                Coinsnap_Bitcoin_Crowdfunding_sharedData.provider,
                 type,
                 redirect,
                 metadata
-            )
-            return cs
+            );
+            return cs;
         }
         else {
             return await createActualCrowdfundingInvoice(
@@ -348,11 +360,11 @@ const createCrowdfundingInvoice = async (amount, message, lastInputCurrency, nam
                 message,
                 lastInputCurrency,
                 name,
-                Coinsnap_Bitcoin_Crowdfunding_sharedData.provider == 'coinsnap',
+                Coinsnap_Bitcoin_Crowdfunding_sharedData.provider,
                 type,
                 redirect,
                 metadata
-            )
+            );
         }
     } else {
         return await createActualCrowdfundingInvoice(
@@ -360,43 +372,43 @@ const createCrowdfundingInvoice = async (amount, message, lastInputCurrency, nam
             message,
             lastInputCurrency,
             name,
-            Coinsnap_Bitcoin_Crowdfunding_sharedData.provider == 'coinsnap',
+            Coinsnap_Bitcoin_Crowdfunding_sharedData.provider,
             type,
             redirect,
             metadata
-        )
+        );
     }
-}
+};
 
 const addCrowdfundingNumSeparators = (amount) => {
-    var tmp = removeCrowdfundingThousandSeparator(amount)
+    var tmp = removeCrowdfundingThousandSeparator(amount);
     var val = Number(tmp).toLocaleString("en-GB");
 
-    if (tmp == '') {
+    if (tmp === '') {
         return '';
     } else {
         return val;
     }
 
-}
+};
 
 const getCrowdfundingThousandSeparator = () => {
     return (1000).toLocaleString("en-GB").replace(/\d/g, '')[0];
-}
+};
 
 const removeCrowdfundingThousandSeparator = (amount) => {
-    const sep = getCrowdfundingThousandSeparator()
-    return amount?.replace(new RegExp(`\\${sep}`, 'g'), '');
+    const sep = getCrowdfundingThousandSeparator();
+    return amount; //amount?.replace(new RegExp(`\\${sep}`, 'g'), '');
 
-}
+};
 
 const cleanCrowdfundingAmount = (amount) => {
-    return parseFloat(removeCrowdfundingThousandSeparator(amount))
+    return parseFloat(removeCrowdfundingThousandSeparator(amount));
 
-}
+};
 
 const NumericICrowdfundingnput = (inputFieldName) => {
-    const inp = document.getElementById(inputFieldName)
+    const inp = document.getElementById(inputFieldName);
     if (inp) {
         const sep = getCrowdfundingThousandSeparator() == "." ? "," : ".";
         var numericKeys = `0123456789${sep}`;

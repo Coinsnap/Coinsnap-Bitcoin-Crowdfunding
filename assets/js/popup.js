@@ -17,22 +17,22 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
     let walletHandler = null;
 
     const resetPopup = (prefix, sufix) => {
-        hideCrowdfundingElementsById(['qr-container', 'blur-overlay', 'payment-loading', 'payment-popup', 'thank-you-popup'], prefix, sufix)
-        showCrowdfundingElementById('public-donor-popup', 'flex', prefix, sufix)
-        const button = document.getElementById(`${prefix}pay${sufix}`)
+        hideCrowdfundingElementsById(['qr-container', 'blur-overlay', 'payment-loading', 'payment-popup', 'thank-you-popup'], prefix, sufix);
+        showCrowdfundingElementById('public-donor-popup', 'flex', prefix, sufix);
+        const button = document.getElementById(`${prefix}pay${sufix}`);
         button.disabled = false;
         const payInWalletBtn = document.getElementById(`${prefix}pay-in-wallet${sufix}`);
         if (walletHandler) {
             payInWalletBtn.removeEventListener('click', walletHandler);
             walletHandler = null;
         }
-    }
+    };
 
 
     window.addEventListener("click", function (event) {
         const qrContainer = document.getElementById(`${prefix}qr-container${sufix}`);
         const element = event.target
-        if (qrContainer.style.display == 'flex') {
+        if (qrContainer.style.display === 'flex') {
             if (element.classList.contains('close-popup') || (!qrContainer.contains(event.target) && !element.id.includes('pay'))) {
                 resetPopup(prefix, sufix)
             }
@@ -40,37 +40,86 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
     });
 
     document.getElementById(`${prefix}pay${sufix}`).addEventListener('click', async () => {
-        const button = document.getElementById(`${prefix}pay${sufix}`)
+        const button = document.getElementById(`${prefix}pay${sufix}`);
         button.disabled = true;
         event.preventDefault();
         const honeypot = document.getElementById(`${prefix}email${sufix}`);
         if (honeypot && honeypot.value) {
-            return
+            return;
         }
-        const amountValue = document.getElementById(`${prefix}amount${sufix}`)?.value
-        if (!amountValue) {
+        
+        const currency = document.getElementById(`${prefix}swap${sufix}`).value?.toUpperCase();
+        const amountValue = document.getElementById(`${prefix}amount${sufix}`)?.value;
+        const amountField = document.getElementById(`${prefix}amount${sufix}`);
+        
+        console.log('Amount check');
+        if (!amountValue || parseFloat(amountValue) === 0) {
             button.disabled = false;
-            addErrorCrowdfundingField(amountField)
-            return
+            addErrorCrowdfundingField(amountField,'');
+            return;
         }
+        
+        let data = {
+            action: 'coinsnap_bitcoin_crowdfunding_amount_check',
+            apiNonce: coinsnap_bitcoin_crowdfunding_ajax.nonce,
+            apiAmount: cleanCrowdfundingAmount(amountValue),
+            apiCurrency: currency
+        };
+
+        const queryData = new URLSearchParams();
+        for ( const key in data ) {
+            queryData.set( key, data[ key ] );
+        }
+
+        
+        const amountCheck = await fetch(coinsnap_bitcoin_crowdfunding_ajax.ajax_url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Cache-Control': 'no-cache'
+            },
+            body: queryData
+        }).catch(error => {
+            console.log('Amount check request error' + error);
+        });
+        
+        const responseData = await amountCheck.json();
+  
+        if(responseData.result === false){
+            button.disabled = false;
+            addErrorCrowdfundingField(amountField,responseData.error);
+            return;
+        }
+        
         const publicDonor = document.getElementById(`${prefix}qr-container${sufix}`).dataset.publicDonors;
         if (!publicDonor) {
-            const publicDonorsPay = document.getElementById(`${prefix}public-donors-pay${sufix}`)
-            publicDonorsPay.click()
+            const publicDonorsPay = document.getElementById(`${prefix}public-donors-pay${sufix}`);
+            publicDonorsPay.click();
         }
-        showCrowdfundingElementsById(['blur-overlay', 'qr-container'], 'flex', prefix, sufix)
+        showCrowdfundingElementsById(['blur-overlay', 'qr-container'], 'flex', prefix, sufix);
     });
 
     document.getElementById(`${prefix}public-donors-pay${sufix}`).addEventListener('click', async () => {
         event.preventDefault();
         const publicDonor = document.getElementById(`${prefix}qr-container${sufix}`).dataset.publicDonors;
         var retryId = '';
-        const crowdfundingId = document.getElementById('bitcoin-crowdfunding-form').dataset.crowdfundingId
-        const amountField = document.getElementById(`${prefix}amount${sufix}`);
-        const amount = cleanCrowdfundingAmount(amountField.value);
+        const crowdfundingId = document.getElementById('bitcoin-crowdfunding-form').dataset.crowdfundingId;
+        
         const currencyField = document.getElementById(`${prefix}swap${sufix}`);
         const currency = currencyField.value?.toUpperCase();
-
+        
+        const amountField = (currency === 'SATS')? document.getElementById(`${prefix}amount${sufix}`) : document.getElementById(`${prefix}satoshi${sufix}`);
+        var amount = (currency === 'SATS')? document.getElementById(`${prefix}amount${sufix}`).value : document.getElementById(`${prefix}satoshi${sufix}`).getAttribute('data-value');
+        amount = cleanCrowdfundingAmount(amount);
+        
+        const amountFiatField = (currency === 'SATS')? document.getElementById(`${prefix}satoshi${sufix}`) : document.getElementById(`${prefix}amount${sufix}`);
+        var amountFiat =  (currency === 'SATS')? document.getElementById(`${prefix}satoshi${sufix}`).getAttribute('data-value') : document.getElementById(`${prefix}amount${sufix}`).value;
+                
+        amountFiat = cleanCrowdfundingAmount(amountFiat);
+        
+        
+        
         const firstNameField = document.getElementById(`${prefix}first-name${sufix}`);
         const lastNameField = document.getElementById(`${prefix}last-name${sufix}`);
         const emailField = document.getElementById(`${prefix}donor-email${sufix}`);
@@ -93,32 +142,33 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
             donorAddress: address != ' ,  , ' ? address : '',
             donorCustom: customContent,
             formType: type,
-            amount: `${amount} ${currency}`,
+            amount: `${amount} SATS`,
+            amountFiat: `${amountFiat} ${currency}`,
             publicDonor: publicDonor || 0,
             modal: true,
             crowdfunding_id: crowdfundingId,
             name: publicName?.value,
             message: publicMessage?.value,
             orderNumber: "Donated for Crowdfunding",
-            crowdfundName: crowdfundName,
-        }
+            crowdfundName: crowdfundName
+        };
         if (!validForm) return;
 
-        showCrowdfundingElementById('payment-loading', 'flex', prefix, sufix)
-        hideCrowdfundingElementById('public-donor-popup', prefix, sufix)
+        showCrowdfundingElementById('payment-loading', 'flex', prefix, sufix);
+        hideCrowdfundingElementById('public-donor-popup', prefix, sufix);
 
         var name = undefined;
-        if (type == "Bitcoin Shoutout") {
+        if (type === "Bitcoin Shoutout") {
             const nameField = document.getElementById(`${prefix}name${sufix}`);
             name = nameField?.value || "Anonymous";
         }
 
-        const res = await createCrowdfundingInvoice(amount, '', currency, name, type, false, metadata)
+        const res = await createCrowdfundingInvoice(amount, amountFiat, currency, '', name, type, false, metadata);
 
         if (res) {
             // Update addresses 
-            const qrLightning = res.lightningInvoice
-            const qrBitcoin = res.onchainAddress
+            const qrLightning = res.lightningInvoice;
+            const qrBitcoin = res.onchainAddress;
 
             if (qrBitcoin) {
                 showCrowdfundingElementsById(['btc-wrapper', 'qr-btc-container'], 'flex', prefix, sufix)
@@ -129,6 +179,7 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
             showCrowdfundingElementsById(['qr-summary', 'qr-lightning-container', 'pay-in-wallet'], 'flex', prefix, sufix)
             hideCrowdfundingElementById('payment-loading', prefix, sufix)
             showCrowdfundingElementById('payment-popup', 'flex', prefix, sufix)
+            
             // Update actuall data
             document.getElementById(`${prefix}qrCode${sufix}`).src = res.qrCodes.lightningQR;
             document.getElementById(`${prefix}qr-lightning${sufix}`).textContent = `${qrLightning.substring(0, 20)}...${qrLightning.slice(-15)}`;
@@ -140,24 +191,12 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
             const copyBtc = document.querySelector(`#${prefix}qr-btc-container${sufix} .qr-copy-icon`);
             copyLightning.addEventListener('click', () => { navigator.clipboard.writeText(qrLightning); });
             copyBtc.addEventListener('click', () => { navigator.clipboard.writeText(qrBitcoin); });
-
-            // Add fiat amount
-            if (exchangeRates['EUR']) {
-                document.getElementById(`${prefix}qr-fiat${sufix}`).textContent = `≈ ${(res.amount * exchangeRates['EUR'])?.toFixed(3)} EUR`;
-                document.getElementById(`${prefix}pay-in-wallet${sufix}`).setAttribute('href', `lightning:${qrLightning}`);
-                
-                //  Browser doesn't know how to redirect to unknown protocol
-                //  Store the handler function when adding the listener
-                // Store the handler function when adding the listener
-                //walletHandler = function () {
-                //    window.location.href = `lightning:${qrLightning}`;
-                //};
-                //document.getElementById(`${prefix}pay-in-wallet${sufix}`).addEventListener('click', walletHandler);
-            }
+            document.getElementById(`${prefix}qr-fiat${sufix}`).textContent = `≈ ${amountFiat} ${currency}`;
+            document.getElementById(`${prefix}pay-in-wallet${sufix}`).setAttribute('href', `lightning:${qrLightning}`);
 
             // Reset retry counter
             var retryNum = 0;
-            retryId = res.id
+            retryId = res.id;
 
             const checkPaymentStatus = () => {
                 fetch(`/wp-json/crowdfunding/v1/check-payment-status/${res.id}`)
@@ -166,17 +205,17 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
                         const qrContainer = document.getElementById(`${prefix}qr-container${sufix}`);
 
                         if (data.status === 'completed') {
-                            showCrowdfundingElementById('thank-you-popup', 'flex', prefix, sufix)
-                            hideCrowdfundingElementById('payment-popup', prefix, sufix)
+                            showCrowdfundingElementById('thank-you-popup', 'flex', prefix, sufix);
+                            hideCrowdfundingElementById('payment-popup', prefix, sufix);
                             setTimeout(() => {
                                 resetPopup(prefix, sufix);
                                 window.location.reload();
                             }, 2000);
 
-                        } else if (qrContainer.style.display != 'flex') {
+                        } else if (qrContainer.style.display !== 'flex') {
                             retryId = '';
                         }
-                        else if (retryNum < 180 && retryId == res.id) {
+                        else if (retryNum < 180 && retryId === res.id) {
                             retryNum++;
                             checkPaymentStatus();
                         } else {
@@ -191,11 +230,11 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
                         }
                     });
             }
-            checkPaymentStatus()
+            checkPaymentStatus();
 
         }
         else {
-            console.error('Error creating invoice')
+            console.error('Error creating invoice');
         }
 
     });

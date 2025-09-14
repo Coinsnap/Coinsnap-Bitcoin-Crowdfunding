@@ -18,51 +18,55 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
         add_action('admin_init', [$this, 'coinsnap_bitcoin_crowdfunding_settings_init']);
     }
 
-    function coinsnap_bitcoin_crowdfunding_add_admin_menu()
-    {
+    function coinsnap_bitcoin_crowdfunding_add_admin_menu(){
+        
         add_menu_page(
-            'Bitcoin Crowdfunding',
-            'Bitcoin Crowdfunding',
+            __('Bitcoin Crowdfunding','coinsnap-bitcoin-crowdfunding'),
+            __('Bitcoin Crowdfunding','coinsnap-bitcoin-crowdfunding'),
             'manage_options',
             'coinsnap-bitcoin-crowdfunding',
             [$this, 'coinsnap_bitcoin_crowdfunding_options_page'],
             esc_url(COINSNAP_BITCOIN_CROWDFUNDING_PLUGIN_DIR . 'assets/images/bitcoin.svg'),
             100
         );
+        
         add_submenu_page(
             'coinsnap-bitcoin-crowdfunding',
-            'Settings',
-            'Settings',
+            __('Settings','coinsnap-bitcoin-crowdfunding'),
+            __('Settings','coinsnap-bitcoin-crowdfunding'),
             'manage_options',
             'coinsnap-bitcoin-crowdfunding',
             [$this, 'coinsnap_bitcoin_crowdfunding_options_page']
         );
+        
         add_submenu_page(
             'coinsnap-bitcoin-crowdfunding',
-            'Donations',
-            'Donations',
+            __('Donations','coinsnap-bitcoin-crowdfunding'),
+            __('Donations','coinsnap-bitcoin-crowdfunding'),
             'manage_options',
             'coinsnap-bitcoin-crowdfunding-donation-list',
             [$this->donation_list, 'render_donation_page']
         );
+        
         add_submenu_page(
             'coinsnap-bitcoin-crowdfunding',
-            'Crowdfundings',
-            'Crowdfundings',
+            __('Crowdfundings','coinsnap-bitcoin-crowdfunding'),
+            __('Crowdfundings','coinsnap-bitcoin-crowdfunding'),
             'manage_options',
             'edit.php?post_type=coinsnap-cfs'
         );
+        
         add_submenu_page(
             'coinsnap-bitcoin-crowdfunding',
-            'Donor Information',
-            'Donor Information',
+            __('Donor Information','coinsnap-bitcoin-crowdfunding'),
+            __('Donor Information','coinsnap-bitcoin-crowdfunding'),
             'manage_options',
             'edit.php?post_type=coinsnap-cf-donors'
         );
     }
 
-    function coinsnap_bitcoin_crowdfunding_settings_init()
-    {
+    function coinsnap_bitcoin_crowdfunding_settings_init(){
+        
         register_setting('coinsnap_bitcoin_crowdfunding_settings', 'coinsnap_bitcoin_crowdfunding_options', [
             'type'              => 'array',
             'sanitize_callback' => [$this, 'sanitize_options']
@@ -71,14 +75,14 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
         // Provider Section
         add_settings_section(
             'coinsnap_bitcoin_crowdfunding_provider_section',
-            'General Settings',
+            __('General Settings','coinsnap-bitcoin-crowdfunding'),
             [$this, 'provider_section_callback'],
             'coinsnap-bitcoin-crowdfunding'
         );
 
         add_settings_field(
             'provider',
-            'Payment Gateway',
+            __('Payment Gateway','coinsnap-bitcoin-crowdfunding'),
             [$this, 'render_field'],
             'coinsnap-bitcoin-crowdfunding',
             'coinsnap_bitcoin_crowdfunding_provider_section',
@@ -94,7 +98,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
 
         add_settings_field(
             'theme',
-            'Theme',
+            __('Theme','coinsnap-bitcoin-crowdfunding'),
             [$this, 'render_field'],
             'coinsnap-bitcoin-crowdfunding',
             'coinsnap_bitcoin_crowdfunding_provider_section',
@@ -112,7 +116,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
         if (strpos(get_site_url(), 'localhost') !== false) {
             add_settings_field(
                 'ngrok_url',
-                'Ngrok URL',
+                __('Ngrok URL','coinsnap-bitcoin-crowdfunding'),
                 [$this, 'render_field'],
                 'coinsnap-bitcoin-crowdfunding',
                 'coinsnap_bitcoin_crowdfunding_provider_section',
@@ -127,14 +131,14 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
         // Coinsnap Section
         add_settings_section(
             'coinsnap_bitcoin_crowdfunding_coinsnap_section',
-            'Coinsnap Settings',
+            __('Coinsnap Settings','coinsnap-bitcoin-crowdfunding'),
             [$this, 'coinsnap_section_callback'],
             'coinsnap-bitcoin-crowdfunding'
         );
 
         add_settings_field(
             'coinsnap_store_id',
-            'Coinsnap Store ID',
+            __('Coinsnap Store ID','coinsnap-bitcoin-crowdfunding'),
             [$this, 'render_field'],
             'coinsnap-bitcoin-crowdfunding',
             'coinsnap_bitcoin_crowdfunding_coinsnap_section',
@@ -146,7 +150,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
 
         add_settings_field(
             'coinsnap_api_key',
-            'Coinsnap API Key',
+            __('Coinsnap API Key','coinsnap-bitcoin-crowdfunding'),
             [$this, 'render_field'],
             'coinsnap-bitcoin-crowdfunding',
             'coinsnap_bitcoin_crowdfunding_coinsnap_section',
@@ -158,7 +162,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
 
         add_settings_field(
             'check_connection_coinsnap',
-            'Check Connection',
+            __('Check Connection','coinsnap-bitcoin-crowdfunding'),
             [$this, 'render_field'],
             'coinsnap-bitcoin-crowdfunding',
             'coinsnap_bitcoin_crowdfunding_coinsnap_section',
@@ -173,14 +177,14 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
         // BTCPay Section
         add_settings_section(
             'coinsnap_bitcoin_crowdfunding_btcpay_section',
-            'BTCPay Settings',
+            __('BTCPay Settings','coinsnap-bitcoin-crowdfunding'),
             [$this, 'btcpay_section_callback'],
             'coinsnap-bitcoin-crowdfunding'
         );
         
         add_settings_field(
             'btcpay_url',
-            'BTCPay URL',
+            __('BTCPay URL','coinsnap-bitcoin-crowdfunding'),
             [$this, 'render_field'],
             'coinsnap-bitcoin-crowdfunding',
             'coinsnap_bitcoin_crowdfunding_btcpay_section',
@@ -194,7 +198,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
 
         add_settings_field(
             'btcpay_store_id',
-            'BTCPay Store ID',
+            __('BTCPay Store ID','coinsnap-bitcoin-crowdfunding'),
             [$this, 'render_field'],
             'coinsnap-bitcoin-crowdfunding',
             'coinsnap_bitcoin_crowdfunding_btcpay_section',
@@ -206,7 +210,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
 
         add_settings_field(
             'btcpay_api_key',
-            'BTCPay API Key',
+            __('BTCPay API Key','coinsnap-bitcoin-crowdfunding'),
             [$this, 'render_field'],
             'coinsnap-bitcoin-crowdfunding',
             'coinsnap_bitcoin_crowdfunding_btcpay_section',
@@ -218,7 +222,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
 
         add_settings_field(
             'check_connection_btcpay',
-            'Check Connection',
+            __('Check Connection','coinsnap-bitcoin-crowdfunding'),
             [$this, 'render_field'],
             'coinsnap-bitcoin-crowdfunding',
             'coinsnap_bitcoin_crowdfunding_btcpay_section',
@@ -288,7 +292,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
             add_settings_error(
                 'coinsnap_bitcoin_crowdfunding_settings',
                 'coinsnap_connection_error',
-                'Error connecting to Coinsnap. Please check your API key and store ID.',
+                __('Error connecting to Coinsnap. Please check your API key and store ID.','coinsnap-bitcoin-crowdfunding'),
                 'error'
             );
         } else {
@@ -299,7 +303,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
                 add_settings_error(
                     'coinsnap_bitcoin_crowdfunding_settings',
                     'coinsnap_response_error',
-                    'Coinsnap responded with an error. Please verify your credentials.',
+                    __('Coinsnap responded with an error. Please verify your credentials.','coinsnap-bitcoin-crowdfunding'),
                     'error'
                 );
             }
@@ -319,7 +323,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
             add_settings_error(
                 'coinsnap_bitcoin_crowdfunding_settings',
                 'btcpay_connection_error',
-                'Error connecting to Btcpay. Please check your API key and store ID.',
+                __('Error connecting to Btcpay. Please check your API key and store ID.','coinsnap-bitcoin-crowdfunding'),
                 'error'
             );
         } else {
@@ -330,7 +334,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
                 add_settings_error(
                     'coinsnap_bitcoin_crowdfunding_settings',
                     'btcpay_response_error',
-                    'Btcpay responded with an error. Please verify your credentials.',
+                    __('Btcpay responded with an error. Please verify your credentials.','coinsnap-bitcoin-crowdfunding'),
                     'error'
                 );
             }
@@ -340,22 +344,22 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
     // Optional section callbacks for additional descriptions
     public function provider_section_callback()
     {
-        echo esc_html_e('Select your preferred payment provider and configure its settings below.', 'coinsnap-bitcoin-crowdfunding');
+        echo esc_html__('Select your preferred payment provider and configure its settings below.', 'coinsnap-bitcoin-crowdfunding');
     }
 
     public function coinsnap_section_callback()
     {
-        echo esc_html_e('Enter your Coinsnap credentials here if you selected Coinsnap as your payment provider.', 'coinsnap-bitcoin-crowdfunding');
+        echo esc_html__('Enter your Coinsnap credentials here if you selected Coinsnap as your payment provider.', 'coinsnap-bitcoin-crowdfunding');
     }
 
     public function btcpay_section_callback()
     {
-        echo esc_html_e('Enter your BTCPay credentials here if you selected BTCPay as your payment provider.', 'coinsnap-bitcoin-crowdfunding');
+        echo esc_html__('Enter your BTCPay credentials here if you selected BTCPay as your payment provider.', 'coinsnap-bitcoin-crowdfunding');
     }
 
     function coinsnap_bitcoin_crowdfunding_section_general_callback()
     {
-        echo esc_html_e('Configure the plugin settings below.', 'coinsnap-bitcoin-crowdfunding');
+        echo esc_html__('Configure the plugin settings below.', 'coinsnap-bitcoin-crowdfunding');
     }
 
     /**
@@ -393,14 +397,14 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
         $field_type  = $args['type'];
         $field_value = isset($options[$field_id]) ? $options[$field_id] : '';
         $defaults = [
-            'default_message' => 'Thank you for your support',
+            'default_message' => __('Thank you for your support', 'coinsnap-bitcoin-crowdfunding'),
             'default_amount'  => '5',
-            'button_text'     => 'Donate',
-            'title_text'      => 'Donate with Bitcoin',
-            'shoutout_default_message' => 'Thank you!',
+            'button_text'     => __('Donate', 'coinsnap-bitcoin-crowdfunding'),
+            'title_text'      => __('Donate with Bitcoin', 'coinsnap-bitcoin-crowdfunding'),
+            'shoutout_default_message' => __('Thank you!', 'coinsnap-bitcoin-crowdfunding'),
             'shoutout_default_amount'  => '5',
-            'shoutout_button_text'     => 'Shoutout',
-            'shoutout_title_text'      => 'Bitcoin Shoutouts',
+            'shoutout_button_text'     => __('Shoutout', 'coinsnap-bitcoin-crowdfunding'),
+            'shoutout_title_text'      => __('Bitcoin Shoutouts', 'coinsnap-bitcoin-crowdfunding'),
             'shoutout_minimum_amount'  => '21',
             'shoutout_premium_amount'  => '21000'
         ];
@@ -424,7 +428,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
             case 'check_connection':
                 $id = isset($args['id']) ? $args['id'] : 'check_connection';
 
-                echo '<div >' . '<button id="' . esc_attr($id) . '_button">Check</button>' . '<span style="" id="' . esc_attr($id) .  '">' . '</span>' . '</div>';
+                echo '<div >' . '<button id="' . esc_attr($id) . '_button">'. esc_html__('Check','coinsnap-bitcoin-crowdfunding').'</button>' . '<span style="" id="' . esc_attr($id) .  '">' . '</span>' . '</div>';
                 break;
 
                 break;
@@ -450,12 +454,12 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings
         }
     }
 
-    public function coinsnap_bitcoin_crowdfunding_options_page()
-    {
+    public function coinsnap_bitcoin_crowdfunding_options_page(){
 ?>
         <div class="wrap">
-            <h1>Coinsnap Bitcoin Crowdfunding Settings</h1>
+            <h1><?php echo esc_html__('Coinsnap Bitcoin Crowdfunding Settings','coinsnap-bitcoin-crowdfunding');?></h1>
             <?php settings_errors('coinsnap_bitcoin_crowdfunding_settings'); ?>
+            <div class="coinsnapConnectionStatus"></div>
             <form method="post" action="options.php">
                 <?php
                 settings_fields('coinsnap_bitcoin_crowdfunding_settings');

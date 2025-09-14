@@ -229,6 +229,17 @@
     toggleDonorFields();
     toggleShoutoutShortcode();
     
+    if($('#coinsnap_bitcoin_crowdfunding_default_currency').length){
+        
+        setStep();
+        $('#coinsnap_bitcoin_crowdfunding_default_currency').change(
+            function(){
+                setStep();
+            }    
+        );
+        
+    }
+    
     $('#coinsnap_bitcoin_crowdfunding_btcpay_wizard_button').click(function(e) {
         e.preventDefault();
         const host = $('#btcpay_url').val();
@@ -252,7 +263,36 @@
         }
     });
     
+    if($('.coinsnapConnectionStatus').length){
+        
+        console.log('Connection check is activated');
+        
+        let ajaxurl = coinsnap_bitcoin_crowdfunding_ajax.ajax_url;
+        let data = {
+            action: 'coinsnap_bitcoin_crowdfunding_connection_handler',
+            apiNonce: coinsnap_bitcoin_crowdfunding_ajax.nonce,
+            apiPost: coinsnap_bitcoin_crowdfunding_ajax.post
+        };
+
+        jQuery.post( ajaxurl, data, function( response ){
+
+            connectionCheckResponse = $.parseJSON(response);
+            let resultClass = (connectionCheckResponse.result === true)? 'success' : 'error';
+            $('.coinsnapConnectionStatus').html('<span class="'+resultClass+'">'+ connectionCheckResponse.message +'</span>');
+            
+        });
+    }
+    
   });
+  
+  function setStep(){
+        let step = 0.01;
+        let currency = $('#coinsnap_bitcoin_crowdfunding_default_currency').val();
+        if(currency === 'RUB' || currency === 'JPY' || currency === 'SATS'){
+            step = 1;
+        }
+        $('.coinsnap_bitcoin_crowdfunding_amount').attr('step', step);
+    }
   
   function isCrowdfundingValidUrl(serverUrl) {
         if(serverUrl.indexOf('http') > -1){
