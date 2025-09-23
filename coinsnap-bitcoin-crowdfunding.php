@@ -94,6 +94,7 @@ class Coinsnap_Bitcoin_Crowdfunding
         add_action('wp_ajax_coinsnap_bitcoin_crowdfunding_btcpay_apiurl_handler', [$this, 'btcpayApiUrlHandler']);
         add_action('wp_ajax_coinsnap_bitcoin_crowdfunding_connection_handler', [$this, 'coinsnapConnectionHandler']);
         add_action('wp_ajax_coinsnap_bitcoin_crowdfunding_amount_check', [$this, 'coinsnapAmountCheck']);
+        add_action('wp_ajax_nopriv_coinsnap_bitcoin_crowdfunding_amount_check', [$this, 'coinsnapAmountCheck']);
     }
     
     public function coinsnapAmountCheck(){
