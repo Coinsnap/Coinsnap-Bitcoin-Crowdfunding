@@ -1,4 +1,3 @@
-
 function deleteCookie(name) {
     document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;';
 }
@@ -87,13 +86,13 @@ const handleCrowdfundingButtonClick = (buttonId, honeypotId, amountId, satoshiId
 };
 
 const handleCrowdfundingButtonClickMulti = (buttonId, honeypotId, amountId, messageId, lastInputCurrency, name) => {
-    const button = document.getElementById(buttonId)
+    const button = document.getElementById(buttonId);
     button.disabled = true;
     event.preventDefault();
-    const honeypot = document.getElementById(honeypotId)
+    const honeypot = document.getElementById(honeypotId);
     if (honeypot && honeypot.value) {
         event.preventDefault();
-        return
+        return;
     }
     const amountField = document.getElementById(amountId);
     const fiatAmount = cleanCrowdfundingAmount(amountField.value);
@@ -105,9 +104,9 @@ const handleCrowdfundingButtonClickMulti = (buttonId, honeypotId, amountId, mess
         return;
     }
 
-    const messageField = document.getElementById(messageId)
-    const message = messageField ? messageField.value : ""
-    const currency = lastInputCurrency.toUpperCase()
+    const messageField = document.getElementById(messageId);
+    const message = messageField ? messageField.value : "";
+    const currency = lastInputCurrency.toUpperCase();
     const amount = fiatAmount;
     if (amount) {
         createCrowdfundingInvoice(amount, amountFiat, currency, message, name, 'Multi Amount Donation');

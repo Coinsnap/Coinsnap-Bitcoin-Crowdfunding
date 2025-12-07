@@ -3,12 +3,12 @@
  * Plugin Name:        Coinsnap Bitcoin Crowdfunding
  * Plugin URI:         https://coinsnap.io/coinsnap-bitcoin-crowdfunding-plugin/
  * Description:        Easy Bitcoin crowdfundings on a WordPress website
- * Version:            1.1.0
+ * Version:            1.1.1
  * Author:             Coinsnap
  * Author URI:         https://coinsnap.io/
  * Text Domain:        coinsnap-bitcoin-crowdfunding
  * Domain Path:         /languages
- * Tested up to:        6.8
+ * Tested up to:        6.9
  * License:             GPL2
  * License URI:         https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -21,7 +21,7 @@ if ( ! defined( 'COINSNAP_BITCOIN_CROWDFUNDING_REFERRAL_CODE' ) ) {
     define( 'COINSNAP_BITCOIN_CROWDFUNDING_REFERRAL_CODE', 'D40892' );
 }
 if ( ! defined( 'COINSNAP_BITCOIN_CROWDFUNDING_VERSION' ) ) {
-    define( 'COINSNAP_BITCOIN_CROWDFUNDING_VERSION', '1.1.0' );
+    define( 'COINSNAP_BITCOIN_CROWDFUNDING_VERSION', '1.1.1' );
 }
 if ( ! defined( 'COINSNAP_BITCOIN_CROWDFUNDING_PHP_VERSION' ) ) {
     define( 'COINSNAP_BITCOIN_CROWDFUNDING_PHP_VERSION', '8.0' );

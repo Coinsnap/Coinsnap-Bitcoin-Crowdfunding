@@ -131,7 +131,7 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
         const address = `${streetField?.value ?? ''} ${houseNumberField?.value ?? ''}, ${postalCodeField?.value ?? ''} ${cityField?.value ?? ''}, ${countryField?.value ?? ''}`;
         const customField = document.getElementById(`${prefix}custom${sufix}`);
         const customNameField = document.getElementById(`${prefix}custom-name${sufix}`);
-        const customContent = customNameField?.textContent && customField?.value ? `${customNameField.textContent}: ${customField.value}` : ''
+        const customContent = customNameField?.textContent && customField?.value ? `${customNameField.textContent}: ${customField.value}` : '';
         const validForm = !publicDonor || checkCFRequiredFieds([firstNameField, lastNameField, emailField, streetField, houseNumberField, postalCodeField, cityField, countryField, customField]);
         const publicName = document.getElementById(`${prefix}public-name${sufix}`);
         const publicMessage = document.getElementById(`${prefix}public-message${sufix}`);
@@ -139,7 +139,7 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
         const metadata = {
             donorName: `${firstNameField?.value ?? ''} ${lastNameField?.value ?? ''}`,
             donorEmail: emailField?.value,
-            donorAddress: address != ' ,  , ' ? address : '',
+            donorAddress: address !== ' ,  , ' ? address : '',
             donorCustom: customContent,
             formType: type,
             amount: `${amount} SATS`,
