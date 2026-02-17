@@ -3,7 +3,7 @@
 Contributors: coinsnap
 Tags: Lightning, bitcoin, crowdfunding, fundraising, BTCPay
 Tested up to: 6.9
-Stable tag: 1.1.1
+Stable tag: 1.2.0
 License: GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -187,3 +187,9 @@ Plugin's page on Coinsnap website: [https://coinsnap.io/coinsnap-bitcoin-crowdfu
 = 1.1.1 :: 2025-12-06 =
 * Fixed Wordpress Plugin Check warnings.
 * Compatibility with Wordpress 6.9 is tested.
+
+= 1.2.0 :: 2026-02-17 =
+* Update: Switching between currencies on frontend.
+* Update: Currency exchange rate calculation and display.
+* Update: Donor's form interface.
+* Compatibility with Wordpress 6.9.1 is tested.

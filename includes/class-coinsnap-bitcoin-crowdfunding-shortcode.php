@@ -87,7 +87,8 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
 
         ob_start();
         ?>
-        <div id="bitcoin-crowdfunding-form" data-crowdfunding-id="<?php echo esc_attr($crowdfunding_id); ?>" data-name="<?php echo esc_attr($title); ?>" class="coinsnap-bitcoin-crowdfunding-form-wrapper <?php echo esc_attr($theme_class); ?> wide-form">
+    <div class="coinsnap-bitcoin-crowdfunding-form">
+        <div id="coinsnap-bitcoin-crowdfunding-form" data-crowdfunding-id="<?php echo esc_attr($crowdfunding_id); ?>" data-name="<?php echo esc_attr($title); ?>" class="coinsnap-bitcoin-crowdfunding-form-wrapper <?php echo esc_attr($theme_class); ?> wide-form">
 
             <div class="crowdfunding-wrapper">
                 <div class="crowdfunding-title-wrapper">
@@ -139,7 +140,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
                     ?>
                         </select>
                     </div>
-                    <input type="text" id="coinsnap-bitcoin-crowdfunding-email" name="bitcoin-email" style="display: none;" aria-hidden="true">
+                    <input type="hidden" id="coinsnap-bitcoin-crowdfunding-email" name="bitcoin-email" aria-hidden="true">
                     <div class="crowdfunding-prefills">
                         <div class="crowdfunding-prefill" id="coinsnap-bitcoin-crowdfunding-pay-crowdfunding-snap1">
                             <div class="crowdfunding-prefill-amount">
@@ -181,7 +182,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
             <?php
             } ?>
 
-            <div id="coinsnap-bitcoin-crowdfunding-blur-overlay-crowdfunding" class="blur-overlay"></div>
+            <div id="coinsnap-bitcoin-crowdfunding-blur-overlay-crowdfunding" class="blur-overlay coinsnap-bitcoin-crowdfunding"></div>
             <?php
             $this->get_template('coinsnap-bitcoin-crowdfunding-modal', [
                 'prefix' => 'coinsnap-bitcoin-crowdfunding-',
@@ -198,7 +199,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
             ]);
             ?>
         </div>
-
+        </div>
 <?php
         return ob_get_clean();
     }

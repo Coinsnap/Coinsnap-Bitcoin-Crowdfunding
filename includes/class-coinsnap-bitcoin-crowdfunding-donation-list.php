@@ -65,9 +65,10 @@ class Coinsnap_Bitcoin_Crowdfunding_Donation_List {
 		$btcpay_url       = $options['btcpay_url'];
 		$btcpay_href      = $btcpay_url . '/stores/' . $btcpay_store_id . '/invoices';
 		$donations        = $this->fetch_donations();
+                $paged            = filter_input(INPUT_GET,'paged',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
 		$donations_per_page = 20;
-		$current_page = (filter_input(INPUT_GET,'paged',FILTER_SANITIZE_FULL_SPECIAL_CHARS) !== null)? max(1, intval(filter_input(INPUT_GET,'paged',FILTER_SANITIZE_FULL_SPECIAL_CHARS))) : 1;
+		$current_page = ($paged !== null)? max(1, intval($paged)) : 1;
 		$total_donations = count($donations);
 		$total_pages   = ceil($total_donations / $donations_per_page);
 		$offset = ($current_page - 1) * $donations_per_page;

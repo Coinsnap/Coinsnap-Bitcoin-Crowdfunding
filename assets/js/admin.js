@@ -147,41 +147,40 @@
       document.cookie = name + "=" + value + ";" + expires + ";path=/";
     }
 
-    async function handleCheckConnection(isSubmit = false) {
-      event.preventDefault();
-      var connection = false
+    async function crowdfundingConnectionCheckHandler(isSubmit = false) {
+      var connection = false;
       const ngrokLiveUrl = document.getElementById('ngrok_url')?.value;
       const origin = ngrokLiveUrl ? ngrokLiveUrl : new URL(window.location.href).origin;
-      const webhookUrl = `${origin}/wp-json/coinsnap-bitcoin-crowdfunding/v1/webhook`
-      if ($providerSelector?.val() == 'coinsnap') {
+      const webhookUrl = `${origin}/wp-json/coinsnap-bitcoin-crowdfunding/v1/webhook`;
+      if ($providerSelector?.val() === 'coinsnap') {
         const coinsnapStoreId = $('#coinsnap_store_id').val();
         const coinsnapApiKey = $('#coinsnap_api_key').val();
-        connection = await checkConnection(coinsnapStoreId, coinsnapApiKey)
+        connection = await checkConnection(coinsnapStoreId, coinsnapApiKey);
         if (connection) {
-          const webhooks = await checkWebhooks(coinsnapStoreId, coinsnapApiKey)
+          const webhooks = await checkWebhooks(coinsnapStoreId, coinsnapApiKey);
           const webhookFound = webhooks?.find(webhook => webhook.url === webhookUrl);
           if (!webhookFound) {
-            await createWebhook(coinsnapStoreId, coinsnapApiKey, webhookUrl)
+            await createWebhook(coinsnapStoreId, coinsnapApiKey, webhookUrl);
           } else {
-            await updateWebhook(coinsnapStoreId, coinsnapApiKey, webhookUrl, webhookFound.id)
+            await updateWebhook(coinsnapStoreId, coinsnapApiKey, webhookUrl, webhookFound.id);
           }
         }
       } else {
         const btcpayStoreId = $('#btcpay_store_id').val();
         const btcpayApiKey = $('#btcpay_api_key').val();
         const btcpayUrl = $('#btcpay_url').val();
-        connection = await checkConnection(btcpayStoreId, btcpayApiKey, btcpayUrl)
+        connection = await checkConnection(btcpayStoreId, btcpayApiKey, btcpayUrl);
         if (connection) {
           const webhooks = await checkWebhooks(btcpayStoreId, btcpayApiKey, btcpayUrl)
           const webhookFound = webhooks?.find(webhook => webhook.url === webhookUrl);
           if (!webhookFound) {
-            await createWebhook(btcpayStoreId, btcpayApiKey, webhookUrl, btcpayUrl)
+            await createWebhook(btcpayStoreId, btcpayApiKey, webhookUrl, btcpayUrl);
           } else {
-            await updateWebhook(btcpayStoreId, btcpayApiKey, webhookUrl, webhookFound.id, btcpayUrl)
+            await updateWebhook(btcpayStoreId, btcpayApiKey, webhookUrl, webhookFound.id, btcpayUrl);
           }
         }
       }
-      setCookie('coinsnap_connection_', JSON.stringify({ 'connection': connection }), 20)
+      setCookie('coinsnap_bitcoin_crowdfunding_connection', JSON.stringify({ 'connection': connection }), 20);
       if (!isSubmit) {
         $('#submit').click();
 
@@ -189,18 +188,18 @@
     }
 
     $('#submit').click(async function (event) {
-      await handleCheckConnection(true);
+      await crowdfundingConnectionCheckHandler();
       $('#submit').click();
     });
 
 
-    $checkConnectionCoisnanpButton.on('click', async (event) => { await handleCheckConnection(); })
-    $checkConnectionBtcPayButton.on('click', async (event) => { await handleCheckConnection(); });
+    $checkConnectionCoisnanpButton.on('click', async (event) => { await crowdfundingConnectionCheckHandler(); })
+    $checkConnectionBtcPayButton.on('click', async (event) => { await crowdfundingConnectionCheckHandler(); });
 
-    const connectionCookie = getCookie('coinsnap_connection_')
+    const connectionCookie = getCookie('coinsnap_bitcoin_crowdfunding_connection');
     if (connectionCookie) {
-      const connectionState = JSON.parse(connectionCookie)?.connection
-      const checkConnection = $(`#check_connection_${$providerSelector?.val()}`)
+      const connectionState = JSON.parse(connectionCookie)?.connection;
+      const checkConnection = $(`#check_connection_${$providerSelector?.val()}`);
       connectionState
         ? checkConnection.css({ color: 'green' }).text('Connection successful')
         : checkConnection.css({ color: 'red' }).text('Connection failed');

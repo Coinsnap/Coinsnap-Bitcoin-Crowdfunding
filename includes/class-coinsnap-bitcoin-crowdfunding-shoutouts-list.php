@@ -70,7 +70,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Shoutouts_List
                     }
                 } else {
                 ?>
-                    <div class="coinsnap-bitcoin-crowdfunding-form <?php echo esc_attr($theme_class); ?>">
+                    <div class="coinsnap-bitcoin-crowdfunding-shoutout <?php echo esc_attr($theme_class); ?>">
                         <div class="shoutout-form-wrapper"
                             style="display: flex;justify-content: center; flex-direction: column; align-items: center; margin: 0">
                             <h3><?php __('Shoutouts List','coinsnap-bitcoin-crowdfunding');?></h3>
