@@ -13,7 +13,7 @@ const checkCFRequiredFieds = (fields) => {
     return valid;
 }
 
-const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redirect) => {
+const addCrowdfundingPopupListener = (prefix, sufix, type, redirect) => {
     let walletHandler = null;
 
     const resetPopup = (prefix, sufix) => {
@@ -104,8 +104,8 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
         event.preventDefault();
         const publicDonor = document.getElementById(`${prefix}qr-container${sufix}`).dataset.publicDonors;
         var retryId = '';
-        const crowdfundingId = document.getElementById('bitcoin-crowdfunding-form').dataset.crowdfundingId;
-        
+        const crowdfundingId = document.getElementById('coinsnap-bitcoin-crowdfunding-form').dataset.crowdfundingId;
+        const crowdfundName = document.getElementById('coinsnap-bitcoin-crowdfunding-form').dataset.name || '';
         const currencyField = document.getElementById(`${prefix}swap${sufix}`);
         const currency = currencyField.value?.toUpperCase();
         
@@ -135,14 +135,14 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
         const validForm = !publicDonor || checkCFRequiredFieds([firstNameField, lastNameField, emailField, streetField, houseNumberField, postalCodeField, cityField, countryField, customField]);
         const publicName = document.getElementById(`${prefix}public-name${sufix}`);
         const publicMessage = document.getElementById(`${prefix}public-message${sufix}`);
-        const crowdfundName = document.getElementById('bitcoin-crowdfunding-form').dataset.name || '';
+        
         const metadata = {
             donorName: `${firstNameField?.value ?? ''} ${lastNameField?.value ?? ''}`,
             donorEmail: emailField?.value,
             donorAddress: address !== ' ,  , ' ? address : '',
             donorCustom: customContent,
             formType: type,
-            amount: `${amount} SATS`,
+            amount: `${amount}`,
             amountFiat: `${amountFiat} ${currency}`,
             publicDonor: publicDonor || 0,
             modal: true,
@@ -163,6 +163,7 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
             name = nameField?.value || "Anonymous";
         }
 
+
         const res = await createCrowdfundingInvoice(amount, amountFiat, currency, '', name, type, false, metadata);
 
         if (res) {
@@ -175,10 +176,10 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, exchangeRates, redire
             }
 
             // Hide spinner and show qr code stuff
-            showCrowdfundingElementsById(['qrCode', 'lightning-wrapper', 'qr-fiat', 'qrCodeBtc'], 'block', prefix, sufix)
-            showCrowdfundingElementsById(['qr-summary', 'qr-lightning-container', 'pay-in-wallet'], 'flex', prefix, sufix)
-            hideCrowdfundingElementById('payment-loading', prefix, sufix)
-            showCrowdfundingElementById('payment-popup', 'flex', prefix, sufix)
+            showCrowdfundingElementsById(['qrCode', 'lightning-wrapper', 'qr-fiat', 'qrCodeBtc'], 'block', prefix, sufix);
+            showCrowdfundingElementsById(['qr-summary', 'qr-lightning-container', 'pay-in-wallet'], 'flex', prefix, sufix);
+            hideCrowdfundingElementById('payment-loading', prefix, sufix);
+            showCrowdfundingElementById('payment-popup', 'flex', prefix, sufix);
             
             // Update actuall data
             document.getElementById(`${prefix}qrCode${sufix}`).src = res.qrCodes.lightningQR;

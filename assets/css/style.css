@@ -1,8 +1,7 @@
 /* Common Styles */
-.coinsnap-bitcoin-crowdfunding-form-wrapper-form {
+.coinsnap-bitcoin-crowdfunding-form-wrapper {
   margin: 20px auto;
   border-radius: 8px;
-  font-family: Arial, sans-serif;
   font-size: 14px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -18,13 +17,13 @@
   width: 32%;
 }
 
-.coinsnap-bitcoin-crowdfunding-form-wrapper-form label {
+.coinsnap-bitcoin-crowdfunding-form-wrapper label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
 }
 
-.coinsnap-bitcoin-crowdfunding-form-wrapper-form input {
+.coinsnap-bitcoin-crowdfunding-form-wrapper input {
   width: 100%;
   padding: 8px !important;
   margin-bottom: 10px;
@@ -33,7 +32,7 @@
   box-sizing: border-box;
 }
 
-.coinsnap-bitcoin-crowdfunding-form-wrapper-form button {
+.coinsnap-bitcoin-crowdfunding-form-wrapper button {
   margin-top: 20px;
   width: 100%;
   padding: 10px;
@@ -49,7 +48,7 @@
   display: flex
 }
 
-.coinsnap-bitcoin-crowdfunding-form-wrapper-form button:hover {
+.coinsnap-bitcoin-crowdfunding-form-wrapper button:hover {
   transition: 250ms;
   background-color: #f7a70a;
 }
@@ -325,10 +324,6 @@
 
 }
 
-.qr-container h4 {
-  margin-bottom: 0px;
-}
-
 .qr-container {
   display: none;
   position: fixed;
@@ -336,15 +331,22 @@
   left: 50%;
   transform: translate(-50%, -50%);
   background: white;
-  padding: 58px 28px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   z-index: 99999;
   border-radius: 8px;
   text-align: center;
   flex-direction: column;
   align-items: center;
-  width: 340px;
+  width: 90%;
+  max-width: 720px;
+  max-height: 95%;
+  overflow: auto;
+  box-sizing: border-box;
   gap: 12px;
+}
+
+.qr-container h4 {
+  margin-bottom: 0px;
 }
 
 .qr-container img {
@@ -612,6 +614,14 @@
   background: #4a4a4a;
 }
 
+#blur-overlay-outer {
+    z-index: 99998;
+}
+
+#coinsnap-popup-outer {
+    z-index: 99999;
+}
+
 .blur-overlay {
   display: none;
   position: fixed;
@@ -631,11 +641,12 @@
   display: flex;
   flex-direction: column;
   width: -webkit-fill-available;
-  margin: 0px 24px;
+  margin: 20px 20px;
 }
 
 .payment-loading {
   display: none;
+  margin:20px;
 }
 
 .payment-popup {
@@ -643,6 +654,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin:20px;
 }
 
 .qr-container .public-donor-popup .public-donor-form input {
@@ -650,11 +662,11 @@
 }
 
 .thank-you-popup {
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin:20px;
 }
 
 .error {
@@ -695,6 +707,17 @@
   color: #3498db;
 }
 
+.person-grid {
+    display: flex;
+    gap: 8px;
+}
+
+@media screen and (max-width: 600px) {  
+    .person-grid {
+        flex-direction: column;
+    }
+}
+
 .address-grid {
   display: flex;
   flex-direction: column;
@@ -706,6 +729,14 @@
   display: flex;
   gap: 8px;
   justify-content: space-between;
+}
+
+.address-row .address-cell.half {
+    width:50%;
+}
+
+.address-row .address-cell.quart {
+    width:25%;
 }
 
 .qr-container .public-donor-popup .public-donor-form .address-row input {
@@ -951,7 +982,7 @@
   gap: 4px;
 }
 
-#bitcoin-crowdfunding-form {
+.coinsnap-bitcoin-crowdfunding-shoutout {
   /* width: 100%; */
   display: flex;
   flex-direction: column;
