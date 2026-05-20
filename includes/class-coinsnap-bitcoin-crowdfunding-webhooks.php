@@ -34,7 +34,9 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks {
         register_rest_route('crowdfunding/v1', '/get-wh-secret', [
             'methods' => 'GET',
             'callback' => [$this, 'get_wh_secret'],
-            'permission_callback' => '__return_true', // TODO: Add proper permissions later
+            'permission_callback' => function() {
+                return current_user_can('manage_options');
+            },
         ]);
     }
 
@@ -89,11 +91,17 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks {
 
         global $wpdb;
         $tab_name = "{$wpdb->prefix}crowdfunding_payments";
-        
-        $results = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM %i WHERE status = 'completed' AND poll_id = %d",
-            $tab_name, $poll_id
-        ));
+
+        $cache_key = 'coinsnap_results_' . $poll_id;
+        $cache_group = 'coinsnap_bitcoin_crowdfunding';
+        $results = wp_cache_get( $cache_key, $cache_group );
+        if ( false === $results ) {
+            $results = $wpdb->get_results($wpdb->prepare( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+                "SELECT * FROM %i WHERE status = 'completed' AND poll_id = %d",
+                $tab_name, $poll_id
+            ));
+            wp_cache_set( $cache_key, $results, $cache_group );
+        }
 
         return ['results' => $results];
     }
@@ -101,48 +109,35 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks {
     function get_payment_status_long_poll($request)
     {
         $payment_id = $request['payment_id'];
-        $poll_id = $request['poll_id'];
-        $start_time = time();
-        $timeout = 5;
-
-        while (time() - $start_time < $timeout) {
-            global $wpdb;
-            $table_name = $wpdb->prefix."crowdfunding_payments";
-            
-            $status = $wpdb->get_var($wpdb->prepare(
-                "SELECT status FROM %i WHERE payment_id = %s",$table_name,$payment_id
+        $poll_id    = $request['poll_id'];
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'crowdfunding_payments';
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $status = $wpdb->get_var($wpdb->prepare(
+            "SELECT status FROM %i WHERE payment_id = %s", $table_name, $payment_id
+        ));
+        if ($status === 'completed') {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+            $results = $wpdb->get_results($wpdb->prepare(
+                "SELECT * FROM %i WHERE status = 'completed' AND poll_id = %d", $table_name, $poll_id
             ));
-            if ($status === 'completed') {
-                $results = $wpdb->get_results($wpdb->prepare(
-                    "SELECT * FROM %i WHERE status = 'completed' AND poll_id = %d",$table_name,$poll_id
-                ));
-
-                return ['status' => 'completed', 'results' => $results];
-            }
-            sleep(1);
+            return ['status' => 'completed', 'results' => $results];
         }
-        // Timeout
         return ['status' => 'pending'];
     }
 
     function get_check_payment_status($request)
     {
         $payment_id = $request['payment_id'];
-        $start_time = time();
-        $timeout = 5;
-
-        while (time() - $start_time < $timeout) {
-            global $wpdb;
-            $status = $wpdb->get_var($wpdb->prepare(
-                "SELECT status FROM {$wpdb->prefix}crowdfunding_payments WHERE payment_id = %s",
-                $payment_id
-            ));
-            if ($status === 'completed') {
-                return ['status' => 'completed'];
-            }
-            sleep(1);
+        global $wpdb;
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $status = $wpdb->get_var($wpdb->prepare(
+            "SELECT status FROM {$wpdb->prefix}crowdfunding_payments WHERE payment_id = %s",
+            $payment_id
+        ));
+        if ($status === 'completed') {
+            return ['status' => 'completed'];
         }
-        // Timeout
         return ['status' => 'pending'];
     }
 
@@ -195,7 +190,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks {
         $payload_data = $request->get_json_params();
 
         if (isset($payload_data['type']) && ($payload_data['type'] === 'Settled' || $payload_data['type'] === 'InvoiceSettled')) {
-            //error_log('Webhook received: ' . json_encode($payload_data));
+            //error_log removed
             // Crowdfunding
             if (isset($payload_data['metadata']['type']) && $payload_data['metadata']['type'] == "Bitcoin Crowdfunding") {
                 global $wpdb;
@@ -205,6 +200,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks {
                 $name = $payload_data['metadata']['name'];
                 $message = $payload_data['metadata']['message'];
 
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
                 $wpdb->insert(
                     "{$wpdb->prefix}crowdfunding_payments",
                     [

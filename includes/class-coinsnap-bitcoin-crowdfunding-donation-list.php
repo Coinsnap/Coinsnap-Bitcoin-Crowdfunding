@@ -10,7 +10,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Donation_List {
 	private function fetch_donations()
 	{
 		$options = get_option('coinsnap_bitcoin_crowdfunding_options');
-		$provider = $options['provider'];
+		$provider = $options['payment_provider'] ?? 'coinsnap';
 
 		if ($provider == 'coinsnap') {
 			$api_key = $options['coinsnap_api_key'];
@@ -22,7 +22,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Donation_List {
 		} else {
 			$api_key = $options['btcpay_api_key'];
 			$store_id = $options['btcpay_store_id'];
-			$base_url = $options['btcpay_url'];
+			$base_url = $options['btcpay_host'] ?? $options['btcpay_url'] ?? '';
 			$url = $base_url . '/api/v1/stores/' . $store_id . '/invoices';
 			$headers = array(
 				'headers' => array('Authorization' => 'token ' . $api_key, 'Content-Type' => 'application/json')
@@ -37,7 +37,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Donation_List {
 		}
 		$filtered_invoices = array_filter($invoices, function ($invoice) {
 			return isset($invoice['metadata']['referralCode'])
-				&& $invoice['metadata']['referralCode'] === "D19833"
+				&& $invoice['metadata']['referralCode'] === COINSNAP_BITCOIN_CROWDFUNDING_REFERRAL_CODE
 				&& $invoice['status'] === 'Settled'
 				&& $invoice['metadata']['type'] === 'Bitcoin Crowdfunding';
 		});
@@ -60,9 +60,9 @@ class Coinsnap_Bitcoin_Crowdfunding_Donation_List {
 		}
 
 		$options          = get_option('coinsnap_bitcoin_crowdfunding_options');
-		$provider         = $options['provider'];
-		$btcpay_store_id  = $options['btcpay_store_id'];
-		$btcpay_url       = $options['btcpay_url'];
+		$provider         = $options['payment_provider'] ?? 'coinsnap';
+		$btcpay_store_id  = $options['btcpay_store_id'] ?? '';
+		$btcpay_url       = $options['btcpay_host'] ?? '';
 		$btcpay_href      = $btcpay_url . '/stores/' . $btcpay_store_id . '/invoices';
 		$donations        = $this->fetch_donations();
                 $paged            = filter_input(INPUT_GET,'paged',FILTER_SANITIZE_FULL_SPECIAL_CHARS);
@@ -133,7 +133,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Donation_List {
 	{
 		$invoice_id = $donation['id'];
 		$options = get_option('coinsnap_bitcoin_crowdfunding_options');
-		$provider = $options['provider'];
+		$provider = $options['payment_provider'] ?? $options['provider'] ?? 'coinsnap';
 		$isBtcpay = $provider === 'btcpay';
 		$href = ($isBtcpay)
 			? "https://btcpay.coincharge.io/invoices/" . esc_html($invoice_id)

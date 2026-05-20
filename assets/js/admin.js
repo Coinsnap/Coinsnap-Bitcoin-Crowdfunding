@@ -67,7 +67,11 @@
     }
 
     const getWebhookSecret = async () => {
-      const response = await fetch('/wp-json/crowdfunding/v1/get-wh-secret');
+      const response = await fetch('/wp-json/crowdfunding/v1/get-wh-secret', {
+        headers: {
+          'X-WP-Nonce': coinsnap_bitcoin_crowdfunding_ajax.rest_nonce || ''
+        }
+      });
       const data = await response.json();
       return data;
     }
@@ -152,9 +156,10 @@
       const ngrokLiveUrl = document.getElementById('ngrok_url')?.value;
       const origin = ngrokLiveUrl ? ngrokLiveUrl : new URL(window.location.href).origin;
       const webhookUrl = `${origin}/wp-json/coinsnap-bitcoin-crowdfunding/v1/webhook`;
-      if ($providerSelector?.val() === 'coinsnap') {
-        const coinsnapStoreId = $('#coinsnap_store_id').val();
-        const coinsnapApiKey = $('#coinsnap_api_key').val();
+      const provider = $providerSelector?.val() || coinsnap_bitcoin_crowdfunding_ajax.provider || 'coinsnap';
+      if (provider === 'coinsnap') {
+        const coinsnapStoreId = $('#coinsnap_store_id').val() || coinsnap_bitcoin_crowdfunding_ajax.coinsnapStoreId || '';
+        const coinsnapApiKey = $('#coinsnap_api_key').val() || coinsnap_bitcoin_crowdfunding_ajax.coinsnapApiKey || '';
         connection = await checkConnection(coinsnapStoreId, coinsnapApiKey);
         if (connection) {
           const webhooks = await checkWebhooks(coinsnapStoreId, coinsnapApiKey);
@@ -166,9 +171,9 @@
           }
         }
       } else {
-        const btcpayStoreId = $('#btcpay_store_id').val();
-        const btcpayApiKey = $('#btcpay_api_key').val();
-        const btcpayUrl = $('#btcpay_url').val();
+        const btcpayStoreId = $('#btcpay_store_id').val() || coinsnap_bitcoin_crowdfunding_ajax.btcpayStoreId || '';
+        const btcpayApiKey = $('#btcpay_api_key').val() || coinsnap_bitcoin_crowdfunding_ajax.btcpayApiKey || '';
+        const btcpayUrl = $('#btcpay_url').val() || coinsnap_bitcoin_crowdfunding_ajax.btcpayUrl || '';
         connection = await checkConnection(btcpayStoreId, btcpayApiKey, btcpayUrl);
         if (connection) {
           const webhooks = await checkWebhooks(btcpayStoreId, btcpayApiKey, btcpayUrl)
@@ -181,16 +186,20 @@
         }
       }
       setCookie('coinsnap_bitcoin_crowdfunding_connection', JSON.stringify({ 'connection': connection }), 20);
-      if (!isSubmit) {
-        $('#submit').click();
-
-      }
     }
 
-    $('#submit').click(async function (event) {
-      await crowdfundingConnectionCheckHandler();
-      $('#submit').click();
-    });
+    // Only attach the submit handler on crowdfunding post edit pages (not on the settings page).
+    if (coinsnap_bitcoin_crowdfunding_ajax.post && parseInt(coinsnap_bitcoin_crowdfunding_ajax.post) > 0) {
+      let _isProcessingSubmit = false;
+      $('#submit').click(async function (event) {
+        if (_isProcessingSubmit) return;
+        _isProcessingSubmit = true;
+        event.preventDefault();
+        await crowdfundingConnectionCheckHandler(true);
+        _isProcessingSubmit = false;
+        $(this).closest('form')[0].submit();
+      });
+    }
 
 
     $checkConnectionCoisnanpButton.on('click', async (event) => { await crowdfundingConnectionCheckHandler(); })

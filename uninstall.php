@@ -8,6 +8,7 @@ $coinsnap_bitcoin_crowdfunding_tables = array(
 );
 
 foreach ($coinsnap_bitcoin_crowdfunding_tables as $coinsnap_bitcoin_crowdfunding_table) {
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
     $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %s",$coinsnap_bitcoin_crowdfunding_table));
 }
 

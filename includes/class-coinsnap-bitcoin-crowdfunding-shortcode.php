@@ -60,9 +60,15 @@ class Coinsnap_Bitcoin_Crowdfunding_Shortcode
 
         global $wpdb;
         $table_name = $wpdb->prefix . 'crowdfunding_payments';
-        $results = $wpdb->get_results(
-            $wpdb->prepare("SELECT * FROM %i WHERE crowdfunding_id = %d AND status = 'completed'",$table_name,$crowdfunding_id)
-        );
+        $cache_key = 'coinsnap_crowdfunding_payments_' . $crowdfunding_id;
+        $results    = wp_cache_get( $cache_key, 'coinsnap_crowdfunding' );
+        if ( false === $results ) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $results = $wpdb->get_results(
+                $wpdb->prepare( "SELECT * FROM %i WHERE crowdfunding_id = %d AND status = 'completed'", $table_name, $crowdfunding_id )
+            );
+            wp_cache_set( $cache_key, $results, 'coinsnap_crowdfunding', 300 );
+        }
         $donations = count($results);
         $raised = 0;
         foreach ($results as $result) {

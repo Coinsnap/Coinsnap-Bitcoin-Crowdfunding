@@ -31,15 +31,21 @@ class Coinsnap_Bitcoin_Crowdfunding_Shoutouts_List
         $table_name = $wpdb->prefix . 'crowdfunding_payments';
 
         // Fetch payments with public name and message
-        $results = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM %i
-            WHERE name IS NOT NULL 
-            AND message IS NOT NULL 
-            AND name != '' 
-            AND crowdfunding_id = %d
-            ORDER BY created_at DESC", $table_name, $crowdfunding_id ),
-            ARRAY_A
-        );
+        $cache_key = 'coinsnap_shoutouts_' . $crowdfunding_id;
+        $cache_group = 'coinsnap_bitcoin_crowdfunding';
+        $results = wp_cache_get( $cache_key, $cache_group );
+        if ( false === $results ) {
+            $results = $wpdb->get_results($wpdb->prepare( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+                "SELECT * FROM %i
+                WHERE name IS NOT NULL 
+                AND message IS NOT NULL 
+                AND name != '' 
+                AND crowdfunding_id = %d
+                ORDER BY created_at DESC", $table_name, $crowdfunding_id ),
+                ARRAY_A
+            );
+            wp_cache_set( $cache_key, $results, $cache_group );
+        }
         
         $shoutouts = array();
 
