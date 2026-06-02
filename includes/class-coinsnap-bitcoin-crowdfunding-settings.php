@@ -41,8 +41,8 @@ class Coinsnap_Bitcoin_Crowdfunding_Settings {
 
         add_submenu_page(
             'coinsnap-bitcoin-crowdfunding',
-            __( 'Donations', 'coinsnap-bitcoin-crowdfunding' ),
-            __( 'Donations', 'coinsnap-bitcoin-crowdfunding' ),
+            __( 'Transactions', 'coinsnap-bitcoin-crowdfunding' ),
+            __( 'Transactions', 'coinsnap-bitcoin-crowdfunding' ),
             'manage_options',
             'coinsnap-bitcoin-crowdfunding-donation-list',
             array( $this->donation_list, 'render_donation_page' )

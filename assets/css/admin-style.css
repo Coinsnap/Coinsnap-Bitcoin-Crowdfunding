@@ -3,65 +3,76 @@
   margin-bottom: 20px;
 }
 
-.coinsnapConnectionStatus{
-    font-size:1.3em;
-        font-weight: 600;
-        margin-top:1em;
-        margin-bottom:1em;
+/* Connection status badge — duplicated here for the CPT metabox screen
+   which does not load the vendor coinsnap-core-admin CSS on its own. */
+.csc-connection-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  background: #f0f0f1;
+  color: #50575e;
+  margin: 1em 0;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-.coinsnapConnectionStatus span:before {
-    content:"";
-    border-radius: 50%;
-    display:inline-block;
-    vertical-align: baseline;
-    width:10px; height:10px;
-    margin:0 5px 0 0;
+.csc-connection-badge .csc-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #a7aaad;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
-.coinsnapConnectionStatus span.error {
-    color: #d63638;
+.csc-connection-badge.is-connected {
+  background: #edfcf2;
+  color: #0a5c1f;
 }
 
-.coinsnapConnectionStatus span.error:before {
-    background:#d63638;
+.csc-connection-badge.is-connected .csc-status-dot {
+  background: #00a32a;
+  box-shadow: 0 0 0 3px rgba(0, 163, 42, 0.15);
 }
 
-.coinsnapConnectionStatus span.success {
-    color: #00a32a;
+.csc-connection-badge.is-error {
+  background: #fcf0f1;
+  color: #8a1116;
 }
 
-.coinsnapConnectionStatus span.success:before {
-    background:#00a32a;
+.csc-connection-badge.is-error .csc-status-dot {
+  background: #d63638;
+  box-shadow: 0 0 0 3px rgba(214, 54, 56, 0.15);
 }
 
-
-.button.btcpay-apikey-link {margin:10px 0;}
-
-.coinsnap-bitcoin-crowdfunding-settings-form input[type="text"],
-.coinsnap-bitcoin-crowdfunding-settings-form select {
+/* Textarea — vendor admin.css only covers input/select inside .csc-field-row */
+.csc-field-row textarea {
+  box-sizing: border-box;
   width: 100%;
-  max-width: 500px;
-  padding: 8px;
+  max-width: 100%;
+  padding: 10px 12px;
   font-size: 14px;
-  border: 1px solid #ccc;
+  line-height: 1.5;
+  border: 1px solid #c3c4c7;
   border-radius: 4px;
-  margin-bottom: 15px;
+  background: #fff;
+  color: #2c3338;
+  resize: vertical;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.coinsnap-bitcoin-crowdfunding-settings-form label {
-  font-weight: bold;
-  margin-bottom: 5px;
-  display: block;
+.csc-field-row textarea:focus {
+  border-color: #2271b1;
+  box-shadow: 0 0 0 1px #2271b1;
+  outline: none;
 }
 
-.provider-settings {
-  display: none;
-  margin-top: 20px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  background: #f9f9f9;
-}
+.button.btcpay-apikey-link { margin: 10px 0; }
 
 /* Admin styles for donation list */
 .donation-controls {
@@ -71,30 +82,20 @@
   gap: 10px;
 }
 
-#check_connection_coinsnap_button {
-  margin-right: 40px;
-  background-color: #f6f6f6;
-  border: 1px solid #444444;
-  cursor: pointer;
-  padding: 6px 14px;
-  border-radius: 10%;
+/* Admin menu icon – slightly smaller than WP default */
+#toplevel_page_coinsnap-bitcoin-crowdfunding .wp-menu-image img {
+  width: 16px !important;
+  padding-top: 9px !important;
 }
 
-#check_connection_coinsnap_button:hover {
-  background-color: #f1f1f1;
+/* Widen the Shortcode column in the coinsnap-cfs post list table */
+.post-type-coinsnap-cfs .column-shortcode {
+  width: 320px;
 }
 
-#check_connection_btcpay_button {
-  margin-right: 40px;
-  background-color: #f6f6f6;
-  border: 1px solid #444444;
-  cursor: pointer;
-  padding: 6px 14px;
-  border-radius: 8px;
-}
-
-#check_connection_btcpay_button:hover {
-  background-color: #f1f1f1;
+.post-type-coinsnap-cfs .column-shortcode code {
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .shortcode_text {
@@ -126,27 +127,19 @@
 .donation-list-table th:nth-child(1),
 .donation-list-table td:nth-child(1) {
   width: 150px;
-  /* Adjust for Date column */
 }
 
 .donation-list-table th:nth-child(2),
 .donation-list-table td:nth-child(2) {
   width: 100px;
-  /* Adjust for Amount column */
 }
 
 .donation-list-table th:nth-child(3),
 .donation-list-table td:nth-child(3) {
   width: 140px;
-  /* Adjust for Type column */
 }
 
 .donation-list-table th:nth-child(5),
 .donation-list-table td:nth-child(5) {
   width: 200px;
-  /* Adjust for InvoiceId column */
-}
-
-.form-table th {
-  width: 240px
 }

@@ -8,7 +8,7 @@
  * Author URI:         https://coinsnap.io/
  * Text Domain:        coinsnap-bitcoin-crowdfunding
  * Domain Path:         /languages
- * Tested up to:        6.9
+ * Tested up to:        7.0
  * License:             GPL2
  * License URI:         https://www.gnu.org/licenses/gpl-2.0.html
  *
@@ -64,7 +64,7 @@ function coinsnap_bitcoin_crowdfunding_plugin_instance(): CoinsnapCore\PluginIns
             'log_dir_name'             => 'coinsnap-cf-logs',
             'log_file_name'            => 'coinsnap-cf.log',
             'menu_slug'                => 'coinsnap-bitcoin-crowdfunding',
-            'plugin_icon_url'          => COINSNAP_CORE_PLUGIN_URL . 'assets/img/coinsnap-icon.svg',
+            'plugin_icon_url'          => COINSNAP_BITCOIN_CROWDFUNDING_PLUGIN_URL . 'assets/images/icon.svg',
             'btcpay_callback_endpoint' => 'coinsnap-btcpay-cf-callback',
             'btcpay_app_name'          => 'CoinsnapBitcoinCrowdfunding',
             'help_links'               => array(
@@ -148,6 +148,75 @@ class Coinsnap_Bitcoin_Crowdfunding {
         add_action( 'wp_ajax_coinsnap_bitcoin_crowdfunding_connection_handler', function () {
             CoinsnapCore\Admin\AjaxHandlers::handle_connection_check( coinsnap_bitcoin_crowdfunding_plugin_instance() );
         } );
+        // Override vendor BTCPay URL handler to support ngrok / HTTPS / popup modes.
+        // Priority 5 runs before the vendor lambda below (priority 10). Calling
+        // wp_send_json_success() terminates execution so the vendor never fires.
+        add_action(
+            'wp_ajax_coinsnap_bitcoin_crowdfunding_btcpay_apiurl_handler',
+            function () {
+                $nonce = filter_input( INPUT_POST, 'apiNonce', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+                if ( ! wp_verify_nonce( $nonce, 'coinsnap-ajax-nonce' ) ) {
+                    wp_die( 'Unauthorized!', '', array( 'response' => 401 ) );
+                }
+                if ( ! current_user_can( 'manage_options' ) ) {
+                    wp_send_json_error( 'Insufficient permissions.' );
+                }
+
+                $host = filter_var(
+                    filter_input( INPUT_POST, 'host', FILTER_SANITIZE_FULL_SPECIAL_CHARS ),
+                    FILTER_VALIDATE_URL
+                );
+                if ( false === $host || ( substr( $host, 0, 7 ) !== 'http://' && substr( $host, 0, 8 ) !== 'https://' ) ) {
+                    wp_send_json_error( 'Error validating BTCPay Server URL.' );
+                }
+
+                $instance = coinsnap_bitcoin_crowdfunding_plugin_instance();
+                $settings = CoinsnapCore\Admin\SettingsPage::get_settings_for( $instance );
+                $endpoint = $instance->get( 'btcpay_callback_endpoint' );
+
+                $popup_mode = false;
+                if ( ! empty( $settings['ngrok_url'] ) ) {
+                    $redirect_url = rtrim( $settings['ngrok_url'], '/' ) . '/?' . $endpoint;
+                } elseif ( is_ssl() ) {
+                    $redirect_url = home_url( '/?' . $endpoint );
+                } else {
+                    $redirect_url = home_url( '/?' . $endpoint . '&popup=1' );
+                    $popup_mode   = true;
+                }
+
+                $permissions = array_merge(
+                    CoinsnapCore\Auth\BTCPayAuthorizer::REQUIRED_PERMISSIONS,
+                    CoinsnapCore\Auth\BTCPayAuthorizer::OPTIONAL_PERMISSIONS
+                );
+
+                try {
+                    $url = CoinsnapCore\Auth\BTCPayAuthorizer::get_authorize_url(
+                        $host,
+                        $permissions,
+                        $instance->get( 'btcpay_app_name', 'Coinsnap' ),
+                        true,
+                        true,
+                        $redirect_url,
+                        null
+                    );
+
+                    CoinsnapCore\Auth\BTCPayAuthorizer::update_settings(
+                        $instance->option_key(),
+                        array( 'btcpay_host' => $host )
+                    );
+
+                    wp_send_json_success( array(
+                        'url'   => $url,
+                        'popup' => $popup_mode,
+                    ) );
+                } catch ( \Throwable $e ) {
+                    wp_send_json_error( 'Error processing request.' );
+                }
+            },
+            5
+        );
+
+        // Vendor fallback (kept for reference; never reached because priority-5 handler above exits).
         add_action( 'wp_ajax_coinsnap_bitcoin_crowdfunding_btcpay_apiurl_handler', function () {
             CoinsnapCore\Admin\AjaxHandlers::handle_btcpay_url( coinsnap_bitcoin_crowdfunding_plugin_instance() );
         } );
@@ -157,6 +226,150 @@ class Coinsnap_Bitcoin_Crowdfunding {
 
         // Register BTCPay OAuth callback via vendor.
         CoinsnapCore\Auth\BTCPayAuthorizer::register_callback( coinsnap_bitcoin_crowdfunding_plugin_instance() );
+
+        // Intercept popup mode before the vendor handler fires at priority 10.
+        // When &popup=1 is present we save credentials here and output the
+        // postMessage page so the popup can relay the key to the opener.
+        add_action(
+            'template_redirect',
+            function () {
+                global $wp_query;
+
+                $endpoint = coinsnap_bitcoin_crowdfunding_plugin_instance()->get( 'btcpay_callback_endpoint' );
+                if ( ! isset( $wp_query->query_vars[ $endpoint ] ) ) {
+                    return;
+                }
+
+                // Only intercept popup requests; normal HTTPS flow goes to vendor at priority 10.
+                $popup = filter_input( INPUT_GET, 'popup', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+                if ( '1' !== $popup ) {
+                    return;
+                }
+
+                if ( ! isset( $wp_query->query_vars[ $endpoint . '-nonce' ] )
+                    || ! wp_verify_nonce( $wp_query->query_vars[ $endpoint . '-nonce' ], 'coinsnap-core-btcpay-nonce' ) ) {
+                    return;
+                }
+
+                $inst         = coinsnap_bitcoin_crowdfunding_plugin_instance();
+                $option_key   = $inst->option_key();
+                $settings_url = admin_url( '/admin.php?page=' . $inst->get( 'menu_slug' ) );
+                $form_data    = get_option( $option_key, array() );
+                $btcpay_host  = is_array( $form_data ) ? ( $form_data['btcpay_host'] ?? '' ) : '';
+
+                $btcpay_api_key = filter_input( INPUT_POST, 'apiKey', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+                if ( empty( $btcpay_api_key ) ) {
+                    wp_safe_redirect( $settings_url );
+                    exit();
+                }
+
+                // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified above via query_vars.
+                $btcpay_perms = isset( $_POST['permissions'] ) && is_array( $_POST['permissions'] )
+                    ? array_map( 'sanitize_text_field', wp_unslash( $_POST['permissions'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
+                    : array();
+
+                if ( empty( $btcpay_perms ) ) {
+                    wp_safe_redirect( $settings_url );
+                    exit();
+                }
+
+                $required = CoinsnapCore\Auth\BTCPayAuthorizer::REQUIRED_PERMISSIONS;
+                $optional = CoinsnapCore\Auth\BTCPayAuthorizer::OPTIONAL_PERMISSIONS;
+
+                $base_perms = array_reduce(
+                    $btcpay_perms,
+                    static function ( array $carry, string $p ) {
+                        return array_merge( $carry, array( explode( ':', $p )[0] ) );
+                    },
+                    array()
+                );
+                $base_perms   = array_diff( $base_perms, $optional );
+                $has_required = empty(
+                    array_merge(
+                        array_diff( $required, $base_perms ),
+                        array_diff( $base_perms, $required )
+                    )
+                );
+
+                $has_single_store = true;
+                $store_id         = null;
+                foreach ( $btcpay_perms as $perm ) {
+                    $parts = explode( ':', $perm );
+                    if ( 2 !== count( $parts ) ) {
+                        wp_safe_redirect( $settings_url );
+                        exit();
+                    }
+                    $received = $parts[1] ?? null;
+                    if ( null === $received ) {
+                        $has_single_store = false;
+                    }
+                    if ( $store_id === $received ) {
+                        continue;
+                    }
+                    if ( null === $store_id ) {
+                        $store_id = $received;
+                        continue;
+                    }
+                    $has_single_store = false;
+                }
+
+                $clean_api_key      = sanitize_text_field( $btcpay_api_key );
+                $store_id_from_perm = '';
+
+                if ( $has_single_store && $has_required ) {
+                    $store_id_from_perm = explode( ':', $btcpay_perms[0] )[1] ?? '';
+
+                    if ( empty( $store_id_from_perm ) && ! empty( $btcpay_host ) ) {
+                        $response = wp_remote_get(
+                            rtrim( $btcpay_host, '/' ) . '/api/v1/stores',
+                            array(
+                                'headers' => array(
+                                    'Authorization' => 'token ' . $clean_api_key,
+                                    'Content-Type'  => 'application/json',
+                                ),
+                                'timeout' => 20,
+                            )
+                        );
+                        if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) < 300 ) {
+                            $stores = json_decode( wp_remote_retrieve_body( $response ), true );
+                            if ( is_array( $stores ) && ! empty( $stores[0]['id'] ) ) {
+                                $store_id_from_perm = $stores[0]['id'];
+                            }
+                        }
+                    }
+
+                    CoinsnapCore\Auth\BTCPayAuthorizer::update_settings(
+                        $option_key,
+                        array(
+                            'btcpay_api_key'   => $clean_api_key,
+                            'btcpay_store_id'  => $store_id_from_perm,
+                            'payment_provider' => 'btcpay',
+                        )
+                    );
+                }
+
+                // Output postMessage page: relays key + storeId to the opener then closes.
+                $js_data     = wp_json_encode( array(
+                    'type'    => 'coinsnap_cf_btcpay_auth',
+                    'apiKey'  => $clean_api_key,
+                    'storeId' => $store_id_from_perm,
+                ) );
+                $js_origin   = wp_json_encode( home_url() );
+                $js_fallback = wp_json_encode( $settings_url );
+
+                header( 'Content-Type: text/html; charset=utf-8' );
+                echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Authorizing...</title>';
+                echo '<script>(function(){';
+                echo 'var d=' . $js_data . ';'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                echo 'if(window.opener&&!window.opener.closed){';
+                echo 'window.opener.postMessage(d,' . $js_origin . ');'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                echo 'window.close();';
+                echo '}else{window.location.href=' . $js_fallback . ';}'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                echo '})();</script></head><body></body></html>';
+                exit();
+            },
+            5
+        );
     }
     
     public function coinsnapAmountCheck() {
@@ -296,8 +509,8 @@ class Coinsnap_Bitcoin_Crowdfunding {
             ?? ( ( ! empty( $post_id ) ) ? get_post_type( $post_id ) : '' );
         $page      = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) ?? '';
 
-        // Vendor admin UI on settings pages.
-        if ( false !== strpos( $page, 'coinsnap-bitcoin-crowdfunding' ) ) {
+        // Vendor admin UI on settings pages and CPT edit screens.
+        if ( false !== strpos( $page, 'coinsnap-bitcoin-crowdfunding' ) || $post_type === 'coinsnap-cfs' || $post_type === 'coinsnap-cf-donors' ) {
             $inst = coinsnap_bitcoin_crowdfunding_plugin_instance();
             wp_register_style( 'coinsnap-core-admin', COINSNAP_CORE_PLUGIN_URL . 'assets/css/admin.css', array(), COINSNAP_CORE_VERSION );
             wp_register_script( 'coinsnap-core-admin', COINSNAP_CORE_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery' ), COINSNAP_CORE_VERSION, true );
@@ -311,10 +524,64 @@ class Coinsnap_Bitcoin_Crowdfunding {
             ) );
             wp_enqueue_style( 'coinsnap-core-admin' );
             wp_enqueue_script( 'coinsnap-core-admin' );
+
+            // Override the vendor's .csc-btn-generate click handler so it can open a
+            // popup and relay the API key back via postMessage when running on HTTP.
+            $popup_inline_js = <<<'JSCODE'
+(function($) {
+    $(document).ready(function() {
+        $('.csc-btn-generate').off('click').on('click', function(e) {
+            e.preventDefault();
+            var $wrapper = $(this).closest('.csc-generate-key-wrapper, .csc-field-row, .bif-generate-key-wrapper');
+            var host = $wrapper.find('input[type="url"]').val() || $(this).siblings('input[type="url"]').val();
+            if (!host || host.indexOf('http') === -1) {
+                alert('Please enter a valid URL including https:// for your BTCPay Server.');
+                return;
+            }
+            try { new URL(host); } catch(err) {
+                alert('Please enter a valid URL including https:// for your BTCPay Server.');
+                return;
+            }
+            if (typeof CoinsnapCoreAdmin === 'undefined' || !CoinsnapCoreAdmin.ajax_url) return;
+            $.post(CoinsnapCoreAdmin.ajax_url, {
+                action: CoinsnapCoreAdmin.btcpay_action || 'coinsnap_core_btcpay_handler',
+                host: host,
+                apiNonce: CoinsnapCoreAdmin.nonce || ''
+            }, function(response) {
+                if (response.data && response.data.url) {
+                    if (response.data.popup) {
+                        var popup = window.open(response.data.url, 'btcpay_cf_auth', 'width=760,height=640,scrollbars=yes,resizable=yes');
+                        var handler = function(event) {
+                            if (event.origin !== window.location.origin) return;
+                            if (!event.data || event.data.type !== 'coinsnap_cf_btcpay_auth') return;
+                            window.removeEventListener('message', handler);
+                            var $apiKey = $('input[name$="[btcpay_api_key]"]');
+                            var $storeId = $('input[name$="[btcpay_store_id]"]');
+                            if (event.data.apiKey && $apiKey.length) {
+                                $apiKey.val(event.data.apiKey).css({'border-color': '#00a32a', 'box-shadow': '0 0 0 1px #00a32a'});
+                            }
+                            if (event.data.storeId && $storeId.length) {
+                                $storeId.val(event.data.storeId).css({'border-color': '#00a32a', 'box-shadow': '0 0 0 1px #00a32a'});
+                            }
+                            if (popup && !popup.closed) { popup.close(); }
+                        };
+                        window.addEventListener('message', handler);
+                    } else {
+                        window.location = response.data.url;
+                    }
+                }
+            }).fail(function() {
+                alert('Error processing your request. Please verify your BTCPay Server URL.');
+            });
+        });
+    });
+})(jQuery);
+JSCODE;
+            wp_add_inline_script( 'coinsnap-core-admin', $popup_inline_js, 'after' );
         }
 
         // Plugin-specific admin CSS/JS on plugin pages and crowdfunding CPT.
-        if ( false !== strpos( $page, 'coinsnap-bitcoin-crowdfunding' ) || $post_type === 'coinsnap-cfs' ) {
+        if ( false !== strpos( $page, 'coinsnap-bitcoin-crowdfunding' ) || $post_type === 'coinsnap-cfs' || $post_type === 'coinsnap-cf-donors' ) {
             $inst    = coinsnap_bitcoin_crowdfunding_plugin_instance();
             $options = CoinsnapCore\Admin\SettingsPage::get_settings_for( $inst );
             wp_enqueue_style( 'coinsnap-bitcoin-crowdfunding-admin-style', COINSNAP_BITCOIN_CROWDFUNDING_PLUGIN_URL . 'assets/css/admin-style.css', array(), COINSNAP_BITCOIN_CROWDFUNDING_VERSION );

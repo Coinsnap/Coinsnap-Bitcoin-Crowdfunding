@@ -171,215 +171,176 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
         if ( empty( $currency ) ) { $currency = 'EUR'; }
 
 ?>
-        <div class="coinsnapConnectionStatus"></div>
-        <table class="form-table">
-            <tr>
-                <th scope="row"><?php echo esc_html_e('Active', 'coinsnap-bitcoin-crowdfunding'); ?></th>
-                <td>
-                    <label>
-                        <input
-                            type="checkbox"
-                            name="coinsnap_bitcoin_crowdfunding_active"
-                            value="1"
-                            <?php checked($active, '1'); ?>>
-                        <?php echo esc_html_e('Enable', 'coinsnap-bitcoin-crowdfunding'); ?>
-                    </label>
-                    <br>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfunding_description"><?php echo esc_html_e('Description', 'coinsnap-bitcoin-crowdfunding'); ?></label>
-                </th>
-                <td>
-                    <textarea
-                        id="coinsnap_bitcoin_crowdfunding_description"
-                        name="coinsnap_bitcoin_crowdfunding_description"
-                        class="regular-text"
-                        rows="2"
-                        required
-                        style="width: 350px"><?php echo esc_textarea($description); ?></textarea>
-                </td>
-            </tr>
-            <th scope="row">
-                <label for="coinsnap_bitcoin_crowdfunding_amount"><?php echo esc_html_e('Goal Amount (in satoshis)', 'coinsnap-bitcoin-crowdfunding') ?></label>
-            </th>
-            <td>
-                <input
-                    type="number"
-                    id="coinsnap_bitcoin_crowdfunding_amount"
-                    name="coinsnap_bitcoin_crowdfunding_amount"
-                    class="regular-text"
-                    required
-                    value="<?php echo esc_attr($amount); ?>"
-                    min="0"
-                    step="1">
-            </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfunding_thank_you_message"><?php echo esc_html_e('Thank You Message', 'coinsnap-bitcoin-crowdfunding') ?></label>
-                </th>
-                <td>
-                    <textarea
-                        id="coinsnap_bitcoin_crowdfunding_thank_you_message"
-                        name="coinsnap_bitcoin_crowdfunding_thank_you_message"
-                        class="regular-text"
-                        rows="2"
-                        required
-                        style="width: 350px"><?php echo esc_textarea($thank_you_message); ?></textarea>
+        <div class="coinsnap-core-admin">
 
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfunding_default_currency"><?php echo esc_html_e('Default Currency', 'coinsnap-bitcoin-crowdfunding') ?></label>
-                </th>
-                <td><select id="coinsnap_bitcoin_crowdfunding_default_currency" name="coinsnap_bitcoin_crowdfunding_default_currency" class="regular-text">
-                <?php
-                    for($j=0;$j<count($coinsnapCurrencies);$j++){
-                        echo '<option value="'.esc_html($coinsnapCurrencies[$j]).'" '.selected($default_currency, $coinsnapCurrencies[$j]).'>'.esc_html($coinsnapCurrencies[$j]).'</option>';
-                    }
-                    ?>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfunding_default_value_1"><?php echo esc_html__('Default Value 1', 'coinsnap-bitcoin-crowdfunding'); echo esc_html(', '.$default_currency);?></label>
-                </th>
-                <td>
-                    <input
-                        type="number"
-                        id="coinsnap_bitcoin_crowdfunding_default_value_1"
-                        name="coinsnap_bitcoin_crowdfunding_default_value_1"
-                        class="regular-text coinsnap_bitcoin_crowdfunding_amount"
-                        value="<?php echo esc_attr($default_value_1); ?>"
-                        min="0"
-                        step="1">
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfunding_default_value_2"><?php echo esc_html__('Default Value 2', 'coinsnap-bitcoin-crowdfunding'); echo esc_html(', '.$default_currency); ?></label>
-                </th>
-                <td>
-                    <input
-                        type="number"
-                        id="coinsnap_bitcoin_crowdfunding_default_value_2"
-                        name="coinsnap_bitcoin_crowdfunding_default_value_2"
-                        class="regular-text coinsnap_bitcoin_crowdfunding_amount"
-                        value="<?php echo esc_attr($default_value_2); ?>"
-                        min="0"
-                        step="1">
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="coinsnap_bitcoin_crowdfunding_default_value_3"><?php echo esc_html__('Default Value 3', 'coinsnap-bitcoin-crowdfunding'); echo esc_html(', '.$default_currency); ?></label>
-                </th>
-                <td>
-                    <input
-                        type="number"
-                        id="coinsnap_bitcoin_crowdfunding_default_value_3"
-                        name="coinsnap_bitcoin_crowdfunding_default_value_3"
-                        class="regular-text coinsnap_bitcoin_crowdfunding_amount"
-                        value="<?php echo esc_attr($default_value_3); ?>"
-                        min="0"
-                        step="1">
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="shortcode"><?php echo esc_html_e('Shortcode', 'coinsnap-bitcoin-crowdfunding') ?></label>
-                </th>
-                <td>
-                    <input
-                        type="text"
-                        id="shortcode"
-                        name="shortcode"
-                        class="regular-text"
-                        readonly
-                        value='[coinsnap_bitcoin_crowdfunding id="<?php echo esc_html($post->ID); ?>"]'>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">Shoutout</th>
-                <td>
-                    <label>
-                        <input
-                            type="checkbox"
-                            name="coinsnap_bitcoin_crowdfunding_shoutout"
-                            value="1"
-                            <?php checked($shoutout, '1'); ?>>
-                        Enable shoutout list
-                    </label>
-                    <br>
-                </td>
-            </tr>
-            <tr id="shoutout-shortcode-row">
-                <th scope="row">
-                    <label for="shoutout-shortcode"><?php echo esc_html_e('Shoutout Shortcode', 'coinsnap-bitcoin-crowdfunding') ?></label>
-                </th>
-                <td>
-                    <input
-                        type="text"
-                        id="shoutout-shortcode"
-                        name="shoutout-shortcode"
-                        class="regular-text"
-                        readonly
-                        value='[coinsnap_bitcoin_crowdfunding_shoutout id="<?php echo esc_html($post->ID); ?>"]'>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">Collect Donor Info</th>
-                <td>
-                    <label>
-                        <input
-                            type="checkbox"
-                            name="coinsnap_bitcoin_crowdfunding_collect_donor_info"
-                            value="1"
-                            <?php checked($collect_donor_info, '1'); ?>>
-                        Enable
-                    </label>
-                    <br>
-                </td>
-            </tr>
-        </table>
+            <div class="csc-connection-badge" id="csc-connection-badge">
+                <span class="csc-status-dot"></span>
+                <span class="csc-connection-text"><?php esc_html_e( 'Checking...', 'coinsnap-bitcoin-crowdfunding' ); ?></span>
+            </div>
 
-        <div id="donor-info-fields" style="margin-top: 20px;">
-            <h3>Donor Information Fields</h3>
-            <table class="form-table">
-                <?php
-                foreach ($donor_fields as $field => $label) {
-                    $visibility_value = get_post_meta($post->ID, '_coinsnap_bitcoin_crowdfunding_' . $field . '_visibility', true) ?: 'optional';
-                ?>
-                    <tr>
-                        <th scope="row"><?php echo esc_html($label); ?></th>
-                        <td>
-                            <select name="coinsnap_bitcoin_crowdfunding_<?php echo esc_attr($field); ?>_visibility">
-                                <option value="mandatory" <?php selected($visibility_value, 'mandatory'); ?>><?php echo esc_html__('Mandatory', 'coinsnap-bitcoin-crowdfunding') ?></option>
-                                <option value="optional" <?php selected($visibility_value, 'optional'); ?>><?php echo esc_html__('Optional', 'coinsnap-bitcoin-crowdfunding') ?></option>
-                                <option value="hidden" <?php selected($visibility_value, 'hidden'); ?>><?php echo esc_html__('Hidden', 'coinsnap-bitcoin-crowdfunding') ?></option>
+            <!-- General -->
+            <div class="csc-card">
+                <div class="csc-card-header">
+                    <h2><?php esc_html_e( 'General', 'coinsnap-bitcoin-crowdfunding' ); ?></h2>
+                </div>
+                <div class="csc-card-body">
+
+                    <div class="csc-field-row">
+                        <label>
+                            <input type="checkbox" name="coinsnap_bitcoin_crowdfunding_active" value="1" <?php checked( $active, '1' ); ?>>
+                            <?php esc_html_e( 'Active', 'coinsnap-bitcoin-crowdfunding' ); ?>
+                        </label>
+                        <p class="csc-field-description"><?php esc_html_e( 'Enable this crowdfunding campaign on your site.', 'coinsnap-bitcoin-crowdfunding' ); ?></p>
+                    </div>
+
+                    <div class="csc-field-row">
+                        <label for="coinsnap_bitcoin_crowdfunding_description"><?php esc_html_e( 'Description', 'coinsnap-bitcoin-crowdfunding' ); ?></label>
+                        <textarea
+                            id="coinsnap_bitcoin_crowdfunding_description"
+                            name="coinsnap_bitcoin_crowdfunding_description"
+                            rows="3"
+                            required><?php echo esc_textarea( $description ); ?></textarea>
+                    </div>
+
+                    <div class="csc-field-row">
+                        <label for="coinsnap_bitcoin_crowdfunding_amount"><?php esc_html_e( 'Goal Amount (in satoshis)', 'coinsnap-bitcoin-crowdfunding' ); ?></label>
+                        <input
+                            type="number"
+                            id="coinsnap_bitcoin_crowdfunding_amount"
+                            name="coinsnap_bitcoin_crowdfunding_amount"
+                            required
+                            value="<?php echo esc_attr( $amount ); ?>"
+                            min="0"
+                            step="1">
+                    </div>
+
+                    <div class="csc-field-row">
+                        <label for="coinsnap_bitcoin_crowdfunding_thank_you_message"><?php esc_html_e( 'Thank You Message', 'coinsnap-bitcoin-crowdfunding' ); ?></label>
+                        <textarea
+                            id="coinsnap_bitcoin_crowdfunding_thank_you_message"
+                            name="coinsnap_bitcoin_crowdfunding_thank_you_message"
+                            rows="3"
+                            required><?php echo esc_textarea( $thank_you_message ); ?></textarea>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Display -->
+            <div class="csc-card">
+                <div class="csc-card-header">
+                    <h2><?php esc_html_e( 'Display', 'coinsnap-bitcoin-crowdfunding' ); ?></h2>
+                    <p class="description"><?php esc_html_e( 'Configure the currency and preset amounts shown to donors.', 'coinsnap-bitcoin-crowdfunding' ); ?></p>
+                </div>
+                <div class="csc-card-body">
+
+                    <div class="csc-field-row">
+                        <label for="coinsnap_bitcoin_crowdfunding_default_currency"><?php esc_html_e( 'Default Currency', 'coinsnap-bitcoin-crowdfunding' ); ?></label>
+                        <select id="coinsnap_bitcoin_crowdfunding_default_currency" name="coinsnap_bitcoin_crowdfunding_default_currency">
+                            <?php for ( $j = 0; $j < count( $coinsnapCurrencies ); $j++ ) :
+                                echo '<option value="' . esc_attr( $coinsnapCurrencies[ $j ] ) . '" ' . selected( $default_currency, $coinsnapCurrencies[ $j ], false ) . '>' . esc_html( $coinsnapCurrencies[ $j ] ) . '</option>';
+                            endfor; ?>
+                        </select>
+                    </div>
+
+                    <div class="csc-field-row">
+                        <label for="coinsnap_bitcoin_crowdfunding_default_value_1">
+                            <?php echo esc_html__( 'Default Value 1', 'coinsnap-bitcoin-crowdfunding' ) . ' ' . esc_html( $default_currency ); ?>
+                        </label>
+                        <input type="number" id="coinsnap_bitcoin_crowdfunding_default_value_1" name="coinsnap_bitcoin_crowdfunding_default_value_1" class="coinsnap_bitcoin_crowdfunding_amount" value="<?php echo esc_attr( $default_value_1 ); ?>" min="0" step="1">
+                    </div>
+
+                    <div class="csc-field-row">
+                        <label for="coinsnap_bitcoin_crowdfunding_default_value_2">
+                            <?php echo esc_html__( 'Default Value 2', 'coinsnap-bitcoin-crowdfunding' ) . ' ' . esc_html( $default_currency ); ?>
+                        </label>
+                        <input type="number" id="coinsnap_bitcoin_crowdfunding_default_value_2" name="coinsnap_bitcoin_crowdfunding_default_value_2" class="coinsnap_bitcoin_crowdfunding_amount" value="<?php echo esc_attr( $default_value_2 ); ?>" min="0" step="1">
+                    </div>
+
+                    <div class="csc-field-row">
+                        <label for="coinsnap_bitcoin_crowdfunding_default_value_3">
+                            <?php echo esc_html__( 'Default Value 3', 'coinsnap-bitcoin-crowdfunding' ) . ' ' . esc_html( $default_currency ); ?>
+                        </label>
+                        <input type="number" id="coinsnap_bitcoin_crowdfunding_default_value_3" name="coinsnap_bitcoin_crowdfunding_default_value_3" class="coinsnap_bitcoin_crowdfunding_amount" value="<?php echo esc_attr( $default_value_3 ); ?>" min="0" step="1">
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Shortcode -->
+            <div class="csc-card csc-card--compact">
+                <div class="csc-card-header">
+                    <h2><?php esc_html_e( 'Shortcode', 'coinsnap-bitcoin-crowdfunding' ); ?></h2>
+                </div>
+                <div class="csc-card-body">
+                    <div class="csc-field-row">
+                        <label for="shortcode"><?php esc_html_e( 'Embed this shortcode in any page or post:', 'coinsnap-bitcoin-crowdfunding' ); ?></label>
+                        <input type="text" id="shortcode" name="shortcode" readonly value='[coinsnap_bitcoin_crowdfunding id="<?php echo esc_attr( $post->ID ); ?>"]'>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shoutout -->
+            <div class="csc-card">
+                <div class="csc-card-header">
+                    <h2><?php esc_html_e( 'Shoutout', 'coinsnap-bitcoin-crowdfunding' ); ?></h2>
+                    <p class="description"><?php esc_html_e( 'Display a public list of donors on your page.', 'coinsnap-bitcoin-crowdfunding' ); ?></p>
+                </div>
+                <div class="csc-card-body">
+
+                    <div class="csc-field-row">
+                        <label>
+                            <input type="checkbox" name="coinsnap_bitcoin_crowdfunding_shoutout" value="1" <?php checked( $shoutout, '1' ); ?>>
+                            <?php esc_html_e( 'Enable shoutout list', 'coinsnap-bitcoin-crowdfunding' ); ?>
+                        </label>
+                    </div>
+
+                    <div id="shoutout-shortcode-row" class="csc-field-row">
+                        <label for="shoutout-shortcode"><?php esc_html_e( 'Shoutout Shortcode', 'coinsnap-bitcoin-crowdfunding' ); ?></label>
+                        <input type="text" id="shoutout-shortcode" name="shoutout-shortcode" readonly value='[coinsnap_bitcoin_crowdfunding_shoutout id="<?php echo esc_attr( $post->ID ); ?>"]'>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Donor Information -->
+            <div class="csc-card">
+                <div class="csc-card-header">
+                    <h2><?php esc_html_e( 'Donor Information', 'coinsnap-bitcoin-crowdfunding' ); ?></h2>
+                    <p class="description"><?php esc_html_e( 'Configure which donor details to collect at checkout.', 'coinsnap-bitcoin-crowdfunding' ); ?></p>
+                </div>
+                <div class="csc-card-body">
+
+                    <div class="csc-field-row">
+                        <label>
+                            <input type="checkbox" name="coinsnap_bitcoin_crowdfunding_collect_donor_info" value="1" <?php checked( $collect_donor_info, '1' ); ?>>
+                            <?php esc_html_e( 'Collect Donor Info', 'coinsnap-bitcoin-crowdfunding' ); ?>
+                        </label>
+                    </div>
+
+                    <div id="donor-info-fields">
+                        <?php foreach ( $donor_fields as $field => $label ) :
+                            $visibility_value = get_post_meta( $post->ID, '_coinsnap_bitcoin_crowdfunding_' . $field . '_visibility', true ) ?: 'optional';
+                        ?>
+                        <div class="csc-field-row">
+                            <label for="coinsnap_bitcoin_crowdfunding_<?php echo esc_attr( $field ); ?>_visibility"><?php echo esc_html( $label ); ?></label>
+                            <select id="coinsnap_bitcoin_crowdfunding_<?php echo esc_attr( $field ); ?>_visibility" name="coinsnap_bitcoin_crowdfunding_<?php echo esc_attr( $field ); ?>_visibility">
+                                <option value="mandatory" <?php selected( $visibility_value, 'mandatory' ); ?>><?php esc_html_e( 'Mandatory', 'coinsnap-bitcoin-crowdfunding' ); ?></option>
+                                <option value="optional" <?php selected( $visibility_value, 'optional' ); ?>><?php esc_html_e( 'Optional', 'coinsnap-bitcoin-crowdfunding' ); ?></option>
+                                <option value="hidden" <?php selected( $visibility_value, 'hidden' ); ?>><?php esc_html_e( 'Hidden', 'coinsnap-bitcoin-crowdfunding' ); ?></option>
                             </select>
-                        </td>
-                    </tr>
-                <?php } ?>
-                <tr>
-                    <th scope="row">
-                        <label for="coinsnap_bitcoin_crowdfunding_custom_field_name"><?php echo esc_html__('Custom Field Name', 'coinsnap-bitcoin-crowdfunding') ?></label>
-                    </th>
-                    <td>
-                        <input
-                            type="text"
-                            id="coinsnap_bitcoin_crowdfunding_custom_field_name"
-                            name="coinsnap_bitcoin_crowdfunding_custom_field_name"
-                            class="regular-text"
-                            value="<?php echo esc_attr($custom_field_name); ?>">
-                    </td>
-                </tr>
+                        </div>
+                        <?php endforeach; ?>
 
-            </table>
+                        <div class="csc-field-row">
+                            <label for="coinsnap_bitcoin_crowdfunding_custom_field_name"><?php esc_html_e( 'Custom Field Name', 'coinsnap-bitcoin-crowdfunding' ); ?></label>
+                            <input type="text" id="coinsnap_bitcoin_crowdfunding_custom_field_name" name="coinsnap_bitcoin_crowdfunding_custom_field_name" value="<?php echo esc_attr( $custom_field_name ); ?>">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
 <?php
     }
@@ -425,15 +386,18 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
 
         if (!defined('REST_REQUEST') || !REST_REQUEST) {
             $required_fields = [
-                'coinsnap_bitcoin_crowdfunding_description',
-                'coinsnap_bitcoin_crowdfunding_amount'
+                'coinsnap_bitcoin_crowdfunding_description' => __('Description', 'coinsnap-bitcoin-crowdfunding'),
+                'coinsnap_bitcoin_crowdfunding_amount'      => __('Goal Amount', 'coinsnap-bitcoin-crowdfunding'),
             ];
 
-            foreach ($required_fields as $field) {
-                if (empty($_POST[$field])) {
-                    wp_die(sprintf( 
-                        /* translators: 1: Error: field is required */
-                        esc_html__( 'Error: %1$s is required.', 'coinsnap-bitcoin-crowdfunding' ), esc_html($field)));
+            foreach ($required_fields as $field => $label) {
+                $value = isset( $_POST[ $field ] ) ? trim( sanitize_text_field( wp_unslash( (string) $_POST[ $field ] ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified above
+                if ('' === $value) {
+                    wp_die(sprintf(
+                        /* translators: 1: Human-readable field label */
+                        esc_html__('Error: %1$s is required.', 'coinsnap-bitcoin-crowdfunding'),
+                        esc_html($label)
+                    ));
                 }
             }
         } else {
@@ -536,7 +500,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Metabox
                 echo get_post_meta($post_id, '_coinsnap_bitcoin_crowdfunding_active', true) ? '✓' : '✗';
                 break;
             case 'shortcode':
-                echo '[bitcoin_crowdfunding id="' . esc_html($post_id) . '"]';
+                echo '<code>[coinsnap_bitcoin_crowdfunding id="' . esc_attr( $post_id ) . '"]</code>';
                 break;
         }
     }

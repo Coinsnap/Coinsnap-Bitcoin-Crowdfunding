@@ -166,76 +166,78 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, redirect) => {
 
         const res = await createCrowdfundingInvoice(amount, amountFiat, currency, '', name, type, false, metadata);
 
-        if (res) {
-            // Update addresses 
-            const qrLightning = res.lightningInvoice;
-            const qrBitcoin = res.onchainAddress;
+        if (res && res.checkoutLink) {
+            // Hide the donor form popup and blur overlay
+            hideCrowdfundingElementsById(['qr-container', 'blur-overlay', 'payment-loading'], prefix, sufix);
 
-            if (qrBitcoin) {
-                showCrowdfundingElementsById(['btc-wrapper', 'qr-btc-container'], 'flex', prefix, sufix)
+            // Build the iframe modal (same pattern as booking)
+            var existingBackdrop = document.querySelector('.cbcf-modal-backdrop');
+            if (existingBackdrop) {
+                existingBackdrop.pollingActive = false;
+                existingBackdrop.remove();
             }
 
-            // Hide spinner and show qr code stuff
-            showCrowdfundingElementsById(['qrCode', 'lightning-wrapper', 'qr-fiat', 'qrCodeBtc'], 'block', prefix, sufix);
-            showCrowdfundingElementsById(['qr-summary', 'qr-lightning-container', 'pay-in-wallet'], 'flex', prefix, sufix);
-            hideCrowdfundingElementById('payment-loading', prefix, sufix);
-            showCrowdfundingElementById('payment-popup', 'flex', prefix, sufix);
-            
-            // Update actuall data
-            document.getElementById(`${prefix}qrCode${sufix}`).src = res.qrCodes.lightningQR;
-            document.getElementById(`${prefix}qr-lightning${sufix}`).textContent = `${qrLightning.substring(0, 20)}...${qrLightning.slice(-15)}`;
-            document.getElementById(`${prefix}qr-btc${sufix}`).textContent = `${qrBitcoin.substring(0, 20)}...${qrBitcoin.slice(-15)}`;
-            document.getElementById(`${prefix}qr-amount${sufix}`).textContent = `Amount: ${res.amount} sats`;
+            var backdrop = document.createElement('div');
+            backdrop.className = 'cbcf-modal-backdrop';
+            backdrop.style.display = 'flex';
+            backdrop.pollingActive = true;
 
-            // Copy address functionallity 
-            const copyLightning = document.querySelector(`#${prefix}qr-lightning-container${sufix} .qr-copy-icon`);
-            const copyBtc = document.querySelector(`#${prefix}qr-btc-container${sufix} .qr-copy-icon`);
-            copyLightning.addEventListener('click', () => { navigator.clipboard.writeText(qrLightning); });
-            copyBtc.addEventListener('click', () => { navigator.clipboard.writeText(qrBitcoin); });
-            document.getElementById(`${prefix}qr-fiat${sufix}`).textContent = `≈ ${amountFiat} ${currency}`;
-            document.getElementById(`${prefix}pay-in-wallet${sufix}`).setAttribute('href', `lightning:${qrLightning}`);
+            var modal = document.createElement('div');
+            modal.className = 'cbcf-modal';
 
-            // Reset retry counter
+            var iframe = document.createElement('iframe');
+            iframe.className = 'cbcf-modal-iframe';
+            iframe.src = res.checkoutLink;
+
+            modal.appendChild(iframe);
+            backdrop.appendChild(modal);
+            document.body.appendChild(backdrop);
+
+            // Click on the dark backdrop (outside modal) closes it
+            backdrop.addEventListener('click', function (e) {
+                if (e.target === backdrop) {
+                    backdrop.pollingActive = false;
+                    backdrop.remove();
+                    document.getElementById(`${prefix}pay${sufix}`).disabled = false;
+                    resetPopup(prefix, sufix);
+                }
+            });
+
+            // Poll for payment completion
             var retryNum = 0;
             retryId = res.id;
 
             const checkPaymentStatus = () => {
+                if (!backdrop.pollingActive) return;
                 fetch(`/wp-json/crowdfunding/v1/check-payment-status/${res.id}`)
                     .then(response => response.json())
                     .then(data => {
-                        const qrContainer = document.getElementById(`${prefix}qr-container${sufix}`);
-
+                        if (!backdrop.pollingActive) return;
                         if (data.status === 'completed') {
-                            showCrowdfundingElementById('thank-you-popup', 'flex', prefix, sufix);
-                            hideCrowdfundingElementById('payment-popup', prefix, sufix);
-                            setTimeout(() => {
-                                resetPopup(prefix, sufix);
-                                window.location.reload();
-                            }, 2000);
-
-                        } else if (qrContainer.style.display !== 'flex') {
-                            retryId = '';
-                        }
-                        else if (retryNum < 180 && retryId === res.id) {
+                            backdrop.pollingActive = false;
+                            backdrop.remove();
+                            resetPopup(prefix, sufix);
+                            window.location.reload();
+                        } else if (retryNum < 180 && retryId === res.id) {
                             retryNum++;
-                            checkPaymentStatus();
-                        } else {
-                            //TODO Invoice expired
+                            setTimeout(checkPaymentStatus, 1000);
                         }
                     })
                     .catch(error => {
                         console.error('Error checking payment status:', error);
                         retryNum++;
-                        if (retryId == res.id) {
+                        if (backdrop.pollingActive && retryId === res.id) {
                             setTimeout(checkPaymentStatus, 5000);
                         }
                     });
-            }
+            };
             checkPaymentStatus();
 
-        }
-        else {
+        } else {
             console.error('Error creating invoice');
+            hideCrowdfundingElementById('payment-loading', prefix, sufix);
+            showCrowdfundingElementById('public-donor-popup', 'flex', prefix, sufix);
+            document.getElementById(`${prefix}pay${sufix}`).disabled = false;
         }
 
     });

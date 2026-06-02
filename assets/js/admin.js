@@ -251,44 +251,58 @@
     $('#coinsnap_bitcoin_crowdfunding_btcpay_wizard_button').click(function(e) {
         e.preventDefault();
         const host = $('#btcpay_url').val();
-	if (isCrowdfundingValidUrl(host)) {
-            let data = {
+        if (isCrowdfundingValidUrl(host)) {
+            const data = {
                 'action': 'coinsnap_bitcoin_crowdfunding_btcpay_apiurl_handler',
                 'host': host,
                 'apiNonce': coinsnap_bitcoin_crowdfunding_ajax.nonce
             };
-            
             $.post(coinsnap_bitcoin_crowdfunding_ajax.ajax_url, data, function(response) {
-                if (response.data.url) {
-                    window.location = response.data.url;
-		}
-            }).fail( function() {
-		alert('Error processing your request. Please make sure to enter a valid BTCPay Server instance URL.')
+                if (response.data && response.data.url) {
+                    if (response.data.popup) {
+                        var popup = window.open(response.data.url, 'btcpay_cf_auth', 'width=760,height=640,scrollbars=yes,resizable=yes');
+                        var handler = function(event) {
+                            if (event.origin !== window.location.origin) return;
+                            if (!event.data || event.data.type !== 'coinsnap_cf_btcpay_auth') return;
+                            window.removeEventListener('message', handler);
+                            if (event.data.apiKey) $('#btcpay_api_key').val(event.data.apiKey).css({'border-color': '#00a32a', 'box-shadow': '0 0 0 1px #00a32a'});
+                            if (event.data.storeId) $('#btcpay_store_id').val(event.data.storeId).css({'border-color': '#00a32a', 'box-shadow': '0 0 0 1px #00a32a'});
+                            if (popup && !popup.closed) { popup.close(); }
+                        };
+                        window.addEventListener('message', handler);
+                    } else {
+                        window.location = response.data.url;
+                    }
+                }
+            }).fail(function() {
+                alert('Error processing your request. Please make sure to enter a valid BTCPay Server instance URL.');
             });
-	}
-        else {
-            alert('Please enter a valid url including https:// in the BTCPay Server URL input field.')
+        } else {
+            alert('Please enter a valid url including https:// in the BTCPay Server URL input field.');
         }
     });
     
-    if($('.coinsnapConnectionStatus').length){
-        
-        console.log('Connection check is activated');
-        
-        let ajaxurl = coinsnap_bitcoin_crowdfunding_ajax.ajax_url;
-        let data = {
-            action: 'coinsnap_bitcoin_crowdfunding_connection_handler',
-            apiNonce: coinsnap_bitcoin_crowdfunding_ajax.nonce,
-            apiPost: coinsnap_bitcoin_crowdfunding_ajax.post
-        };
-
-        jQuery.post( ajaxurl, data, function( response ){
-
-            connectionCheckResponse = $.parseJSON(response);
-            let resultClass = (connectionCheckResponse.result === true)? 'success' : 'error';
-            $('.coinsnapConnectionStatus').html('<span class="'+resultClass+'">'+ connectionCheckResponse.message +'</span>');
-            
-        });
+    if ($('#csc-connection-badge').length) {
+        $.post(
+            coinsnap_bitcoin_crowdfunding_ajax.ajax_url,
+            {
+                action: 'coinsnap_bitcoin_crowdfunding_connection_handler',
+                apiNonce: coinsnap_bitcoin_crowdfunding_ajax.nonce,
+                apiPost: coinsnap_bitcoin_crowdfunding_ajax.post
+            },
+            function(response) {
+                const result = (typeof response === 'string') ? JSON.parse(response) : response;
+                const $badge = $('#csc-connection-badge');
+                $badge.removeClass('is-connected is-error');
+                if (result.result === true) {
+                    $badge.addClass('is-connected');
+                    $badge.find('.csc-connection-text').text('Connected');
+                } else {
+                    $badge.addClass('is-error');
+                    $badge.find('.csc-connection-text').text('Not connected');
+                }
+            }
+        );
     }
     
   });
