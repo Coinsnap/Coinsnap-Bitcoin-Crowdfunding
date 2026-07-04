@@ -209,7 +209,9 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, redirect) => {
 
             const checkPaymentStatus = () => {
                 if (!backdrop.pollingActive) return;
-                fetch(`/wp-json/crowdfunding/v1/check-payment-status/${res.id}`)
+                fetch(`/wp-json/crowdfunding/v1/check-payment-status/${res.id}`, {
+                        headers: { 'X-WP-Nonce': Coinsnap_Bitcoin_Crowdfunding_sharedData?.nonce || '' }
+                    })
                     .then(response => response.json())
                     .then(data => {
                         if (!backdrop.pollingActive) return;
