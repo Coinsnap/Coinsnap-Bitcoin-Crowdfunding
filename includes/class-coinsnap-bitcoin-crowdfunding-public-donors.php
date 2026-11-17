@@ -51,7 +51,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Public_Donors
             'object_subtype' => 'coinsnap-cf-donors',
             'type' => 'string',
             'single' => true,
-            'show_in_rest' => true,
+            'show_in_rest' => false,
         ]);
 
         register_meta('post', '_coinsnap_bitcoin_crowdfunding_amount', [
@@ -79,14 +79,14 @@ class Coinsnap_Bitcoin_Crowdfunding_Public_Donors
             'object_subtype' => 'coinsnap-cf-donors',
             'type' => 'string',
             'single' => true,
-            'show_in_rest' => true,
+            'show_in_rest' => false,
         ]);
 
         register_meta('post', '_coinsnap_bitcoin_crowdfunding_address', [
             'object_subtype' => 'coinsnap-cf-donors',
             'type' => 'string',
             'single' => true,
-            'show_in_rest' => true,
+            'show_in_rest' => false,
         ]);
 
         register_meta('post', '_coinsnap_bitcoin_crowdfunding_payment_id', [
@@ -100,7 +100,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Public_Donors
             'object_subtype' => 'coinsnap-cf-donors',
             'type' => 'string',
             'single' => true,
-            'show_in_rest' => true,
+            'show_in_rest' => false,
         ]);
     }
 
