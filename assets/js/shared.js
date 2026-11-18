@@ -37,84 +37,10 @@ const removeCrowdfundingBorderOnFocus = (field1, field2) => {
     });
 };
 
-const handleCrowdfundingButtonClick = (buttonId, honeypotId, amountId, satoshiId, messageId, lastInputCurrency, name) => {
-    event.preventDefault();
 
-    const button = document.getElementById(buttonId);
-    button.disabled = true;
-
-    const honeypot = document.getElementById(honeypotId);
-    if (honeypot && honeypot.value){
-        return;
-    }
-
-    const amountField = document.getElementById(amountId);
-    const fiatAmount = cleanCrowdfundingAmount(amountField.value);
-
-    let satoshiField = null;
-    let satsAmount = null;
-
-    if (satoshiId) {
-        satoshiField = document.getElementById(satoshiId);
-        satsAmount = cleanCrowdfundingAmount(satoshiField.value);
-    }
-
-    if (isNaN(fiatAmount) && isNaN(satsAmount)) {
-        button.disabled = false;
-        addErrorCrowdfundingField(amountField,'');
-        if (satoshiField) {
-            addErrorCrowdfundingField(satoshiField,'');
-            removeCrowdfundingBorderOnFocus(satoshiField, amountField);
-            removeCrowdfundingBorderOnFocus(amountField, satoshiField);
-        }
-        return;
-    }
-
-    const messageField = document.getElementById(messageId);
-    const message = messageField ? messageField.value : "";
-
-    const currency = lastInputCurrency.toUpperCase();
-    const amount = currency === 'SATS' ? satsAmount : fiatAmount;
-
-    if (!isNaN(amount) && amount > 0) {
-        const type = name ? 'Shoutout Donation' : 'Donation Button';
-        createCrowdfundingInvoice(amount, fiatAmount, lastInputCurrency, message, name, type, );
-    } else {
-        button.disabled = false;
-    }
-};
-
-const handleCrowdfundingButtonClickMulti = (buttonId, honeypotId, amountId, messageId, lastInputCurrency, name) => {
-    const button = document.getElementById(buttonId);
-    button.disabled = true;
-    event.preventDefault();
-    const honeypot = document.getElementById(honeypotId);
-    if (honeypot && honeypot.value) {
-        event.preventDefault();
-        return;
-    }
-    const amountField = document.getElementById(amountId);
-    const fiatAmount = cleanCrowdfundingAmount(amountField.value);
-
-    if (!fiatAmount) {
-        button.disabled = false;
-        addErrorCrowdfundingField(amountField,'');
-        event.preventDefault();
-        return;
-    }
-
-    const messageField = document.getElementById(messageId);
-    const message = messageField ? messageField.value : "";
-    const currency = lastInputCurrency.toUpperCase();
-    const amount = fiatAmount;
-    if (amount) {
-        createCrowdfundingInvoice(amount, fiatAmount, currency, message, name, 'Multi Amount Donation');
-    }
-};
 
 async function generateQRCodeCrowdfundingDataURL(text) {
     try {
-        console.log('Invoice URL: ' + encodeURIComponent(text));
         const response = await fetch(`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(text)}`);
         const blob = await response.blob();
         return new Promise((resolve) => {
@@ -123,234 +49,37 @@ async function generateQRCodeCrowdfundingDataURL(text) {
             reader.readAsDataURL(blob);
         });
     } catch (error) {
-        console.error('Error generating QR code:', error);
         return null;
     }
 }
 
-const createActualCrowdfundingInvoice = async (amount, message, lastInputCurrency, name, coinsnap, type, redirect, metadata) => {
-    deleteCookie('coinsnap_invoice_crowdfunding');
-    
-    var provider = (coinsnap === true)? 'coinsnap' : 'btcpay';
-    var orderId = 'CRFN_' + (Date.now()).toString(36);
-    
-    if(provider === 'btcpay'){
-        metadata.orderId = orderId;
-    }
-
-    const requestData = {
-        amount: amount,
-        currency: lastInputCurrency,
-        buyerEmail: metadata.donorEmail,
-        redirectAutomatically: true,
-        checkout: {
-            redirectAutomatically: true
-        },
-        orderId: orderId,
-        walletMessage: message,
-        metadata: {
-            orderNumber: message,
-            type: type,
-            name: name,
-            ...metadata
-        }
-    };
-    
-    requestData.provider = provider;
-    
-    if (type === 'Donation Crowdfunding') {
-        requestData.redirectUrl = requestData.checkout.redirectUrl = Coinsnap_Bitcoin_Crowdfunding_sharedData?.redirectUrl || window.location.href;        
-    }
-    
-    if (window.location.href.includes("localhost")) {
-        requestData.redirectUrl = requestData.checkout.redirectUrl = "https://coinsnap.io";
-    }
-
-    if (provider === 'coinsnap') {
-        requestData.referralCode = 'D2SXIW';
-    }
-
-    const url = (provider === 'coinsnap')?
-        `https://app.coinsnap.io/api/v1/stores/${Coinsnap_Bitcoin_Crowdfunding_sharedData?.coinsnapStoreId}/invoices`
-        : `${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayUrl}/api/v1/stores/${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayStoreId}/invoices`;
-
-    const headers = (provider === 'coinsnap')
-        ? {
-            'x-api-key': Coinsnap_Bitcoin_Crowdfunding_sharedData?.coinsnapApiKey,
-            'Content-Type': 'application/json'
-        }
-        : {
-            'Authorization': `token ${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayApiKey}`,
-            'Content-Type': 'application/json'
-        };
-
+/*
+ * The server creates the invoice. The browser sends only the crowdfunding ID,
+ * the amount in sats and the donor's form fields; it never sees an API key.
+ */
+const createCrowdfundingInvoice = async (crowdfundingId, sats, donor) => {
     try {
-        const response = await fetch(url, {
+        const response = await fetch(Coinsnap_Bitcoin_Crowdfunding_sharedData.invoiceUrl, {
             method: 'POST',
-            headers: headers,
-            body: JSON.stringify(requestData)
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.assign({}, donor || {}, {
+                crowdfunding_id: crowdfundingId,
+                amount: Math.round(sats)
+            }))
         });
-
+        const responseData = await response.json();
         if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            return { error: responseData?.message || 'Error' };
         }
 
-        var responseData = await response.json();
-
-        const invoiceCookieData = {
-            id: responseData.id,
-            amount: amount,
-            currency: lastInputCurrency,
-            checkoutLink: responseData.checkoutLink,
-            message: message,
-            name: name
-        };
-
-        setCookie('coinsnap_invoice_crowdfunding', JSON.stringify(invoiceCookieData), 15);
-
-        if (provider === 'btcpay') {
-            const url = `${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayUrl}/api/v1/stores/${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayStoreId}/invoices/${responseData.id}/payment-methods`;
-            const response2 = await fetch(url, {
-                method: 'GET',
-                headers: headers
-            });
-            const responseData2 = await response2.json();
-            const paymentLink = responseData2[0].paymentLink;
-            console.log('Payment Link:', paymentLink);
-            responseData.lightningInvoice = paymentLink?.replace('lightning:', '');
-            responseData.onchainAddress = '';
-
-            // Generate QR code image from lightning invoice
-            const qrCodeImage = await generateQRCodeCrowdfundingDataURL(paymentLink);
-            responseData.qrCodes = {
-                lightningQR: qrCodeImage || paymentLink
-            };
+        if (Coinsnap_Bitcoin_Crowdfunding_sharedData.provider === 'btcpay' && responseData.paymentLink) {
+            const qrCodeImage = await generateQRCodeCrowdfundingDataURL(responseData.paymentLink);
+            responseData.qrCodes = { lightningQR: qrCodeImage || responseData.paymentLink };
         }
-
-        if (redirect) {
-            window.location.href = responseData.checkoutLink;
-        }
-
         return responseData;
     } catch (error) {
-        console.error('Error creating invoice:', error);
         return null;
-    }
-};
-
-const checkCrowdfundingInvoiceStatus = async (invoiceId, amount, message, lastInputCurrency, name, coinsnap, type, redirect, metadata) => {
-
-    const url = coinsnap
-        ? `https://app.coinsnap.io/api/v1/stores/${Coinsnap_Bitcoin_Crowdfunding_sharedData.coinsnapStoreId}/invoices/${invoiceId}`
-        : `${Coinsnap_Bitcoin_Crowdfunding_sharedData.btcpayUrl}/api/v1/stores/${Coinsnap_Bitcoin_Crowdfunding_sharedData.btcpayStoreId}/invoices/${invoiceId}`;
-
-    const headers = coinsnap
-        ? {
-            'x-api-key': Coinsnap_Bitcoin_Crowdfunding_sharedData.coinsnapApiKey,
-            'Content-Type': 'application/json'
-
-        }
-        : {
-            'Authorization': `token ${Coinsnap_Bitcoin_Crowdfunding_sharedData.btcpayApiKey}`,
-            'Content-Type': 'application/json'
-        };
-
-    try {
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: headers
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        var responseData = await response.json();
-
-        if (!coinsnap) {
-            const url = `${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayUrl}/api/v1/stores/${Coinsnap_Bitcoin_Crowdfunding_sharedData?.btcpayStoreId}/invoices/${responseData.id}/payment-methods`;
-            const response2 = await fetch(url, {
-                method: 'GET',
-                headers: headers
-            });
-            const responseData2 = await response2.json();
-            const paymentLink = responseData2[0].paymentLink;
-            console.log('Payment Link:', paymentLink);
-            responseData.lightningInvoice = paymentLink?.replace('lightning:', '');
-            responseData.onchainAddress = '';
-
-            // Generate QR code image from lightning invoice
-            const qrCodeImage = await generateQRCodeDataURL(paymentLink);
-            responseData.qrCodes = {
-                lightningQR: qrCodeImage || paymentLink
-            };
-        }
-
-        if (responseData?.status === 'Settled') {
-            return await createActualCrowdfundingInvoice(amount, message, lastInputCurrency, name, coinsnap, type, redirect, metadata);
-        } else if (responseData?.status === 'New') {
-            if (redirect) {
-                window.location.href = responseData.checkoutLink;
-            }
-            return responseData;
-        }
-
-    } catch (error) {
-        console.error('Error creating invoice:', error);
-        return null;
-    }
-};
-
-const createCrowdfundingInvoice = async (amount, amountFiat, lastInputCurrency,  message, name, type, redirect = true, metadata) => {
-    existingInvoice = getCookie('coinsnap_invoice_crowdfunding');
-    lastInputCurrency = 'SATS';
-    if (existingInvoice) {
-        invoiceJson = JSON.parse(existingInvoice);
-        if (
-            invoiceJson.id &&
-            invoiceJson.checkoutLink &&
-            invoiceJson.amount === amount &&
-            invoiceJson.currency === lastInputCurrency &&
-            invoiceJson.message === message &&
-            invoiceJson.name === name
-        ) {
-            const cs = await checkCrowdfundingInvoiceStatus(
-                invoiceJson.id,
-                amount,
-                message,
-                lastInputCurrency,
-                name,
-                Coinsnap_Bitcoin_Crowdfunding_sharedData.provider === 'coinsnap',
-                type,
-                redirect,
-                metadata
-            );
-            return cs;
-        }
-        else {
-            return await createActualCrowdfundingInvoice(
-                amount,
-                message,
-                lastInputCurrency,
-                name,
-                Coinsnap_Bitcoin_Crowdfunding_sharedData.provider === 'coinsnap',
-                type,
-                redirect,
-                metadata
-            );
-        }
-    } else {
-        
-        return await createActualCrowdfundingInvoice(
-            amount,
-            message,
-            lastInputCurrency,
-            name,
-            Coinsnap_Bitcoin_Crowdfunding_sharedData.provider === 'coinsnap',
-            type,
-            redirect,
-            metadata
-        );
     }
 };
 

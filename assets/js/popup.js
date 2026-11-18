@@ -52,7 +52,6 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, redirect) => {
         const amountValue = document.getElementById(`${prefix}amount${sufix}`)?.value;
         const amountField = document.getElementById(`${prefix}amount${sufix}`);
         
-        console.log('Amount check');
         if (!amountValue || parseFloat(amountValue) === 0) {
             button.disabled = false;
             addErrorCrowdfundingField(amountField,'');
@@ -80,9 +79,11 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, redirect) => {
                 'Cache-Control': 'no-cache'
             },
             body: queryData
-        }).catch(error => {
-            console.log('Amount check request error' + error);
-        });
+        }).catch(() => null);
+        if (!amountCheck) {
+            button.disabled = false;
+            return;
+        }
         
         const responseData = await amountCheck.json();
   
@@ -136,40 +137,37 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, redirect) => {
         const publicName = document.getElementById(`${prefix}public-name${sufix}`);
         const publicMessage = document.getElementById(`${prefix}public-message${sufix}`);
         
-        const metadata = {
-            donorName: `${firstNameField?.value ?? ''} ${lastNameField?.value ?? ''}`,
-            donorEmail: emailField?.value,
-            donorAddress: address !== ' ,  , ' ? address : '',
-            donorCustom: customContent,
-            formType: type,
-            amount: `${amount}`,
-            amountFiat: `${amountFiat} ${currency}`,
-            publicDonor: publicDonor || 0,
-            modal: true,
-            crowdfunding_id: crowdfundingId,
-            name: publicName?.value,
-            message: publicMessage?.value,
-            orderNumber: "Donated for Crowdfunding",
-            crowdfundName: crowdfundName
+        const donor = {
+            first_name: firstNameField?.value ?? '',
+            last_name: lastNameField?.value ?? '',
+            email: emailField?.value ?? '',
+            street: streetField?.value ?? '',
+            house_number: houseNumberField?.value ?? '',
+            postal: postalCodeField?.value ?? '',
+            town: cityField?.value ?? '',
+            country: countryField?.value ?? '',
+            custom: customField?.value ?? '',
+            public_name: publicName?.value ?? '',
+            public_message: publicMessage?.value ?? ''
         };
         if (!validForm) return;
 
         showCrowdfundingElementById('payment-loading', 'flex', prefix, sufix);
         hideCrowdfundingElementById('public-donor-popup', prefix, sufix);
 
-        var name = undefined;
-        if (type === "Bitcoin Shoutout") {
-            const nameField = document.getElementById(`${prefix}name${sufix}`);
-            name = nameField?.value || "Anonymous";
+        const res = await createCrowdfundingInvoice(crowdfundingId, amount, donor);
+
+        if (res && res.error) {
+            hideCrowdfundingElementById('payment-loading', prefix, sufix);
+            showCrowdfundingElementById('public-donor-popup', 'flex', prefix, sufix);
+            addErrorCrowdfundingField(document.getElementById(`${prefix}amount${sufix}`), res.error);
+            return;
         }
-
-
-        const res = await createCrowdfundingInvoice(amount, amountFiat, currency, '', name, type, false, metadata);
 
         if (res) {
             // Update addresses 
-            const qrLightning = res.lightningInvoice;
-            const qrBitcoin = res.onchainAddress;
+            const qrLightning = res.lightningInvoice || '';
+            const qrBitcoin = res.onchainAddress || '';
 
             if (qrBitcoin) {
                 showCrowdfundingElementsById(['btc-wrapper', 'qr-btc-container'], 'flex', prefix, sufix)
@@ -200,7 +198,7 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, redirect) => {
             retryId = res.id;
 
             const checkPaymentStatus = () => {
-                fetch(`/wp-json/crowdfunding/v1/check-payment-status/${res.id}`)
+                fetch(`${Coinsnap_Bitcoin_Crowdfunding_sharedData.statusUrl}${encodeURIComponent(res.id)}`)
                     .then(response => response.json())
                     .then(data => {
                         const qrContainer = document.getElementById(`${prefix}qr-container${sufix}`);
@@ -223,8 +221,7 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, redirect) => {
                             //TODO Invoice expired
                         }
                     })
-                    .catch(error => {
-                        console.error('Error checking payment status:', error);
+                    .catch(() => {
                         retryNum++;
                         if (retryId == res.id) {
                             setTimeout(checkPaymentStatus, 5000);
@@ -235,7 +232,8 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, redirect) => {
 
         }
         else {
-            console.error('Error creating invoice');
+            hideCrowdfundingElementById('payment-loading', prefix, sufix);
+            showCrowdfundingElementById('public-donor-popup', 'flex', prefix, sufix);
         }
 
     });
