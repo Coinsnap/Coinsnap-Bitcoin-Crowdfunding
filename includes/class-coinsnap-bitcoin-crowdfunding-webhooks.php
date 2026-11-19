@@ -142,7 +142,7 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks {
             'orderNumber'     => 'Donated for Crowdfunding',
         ];
         // Standard invoice fields (BTCPay/Coinsnap names) next to the keys above, which stay as they are.
-        $metadata += $this->standard_metadata($crowdfunding_id, $title, $sats, $donor, $public_name, $public_message);
+        $metadata += $this->standard_metadata($crowdfunding_id, $sats, $donor, $public_name, $public_message);
 
         $invoice = Coinsnap_Bitcoin_Crowdfunding_Security::create_invoice($cfg, $sats, $metadata, (string) ($donor['email'] ?? ''));
         if ($invoice === null) {
@@ -168,9 +168,9 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks {
      * What the pledge is for and the donor's fields, under the BTCPay/Coinsnap names. Plain values;
      * empty ones are left out when the invoice is created.
      */
-    private function standard_metadata(int $crowdfunding_id, string $title, int $sats, array $donor, string $public_name, string $public_message): array
+    private function standard_metadata(int $crowdfunding_id, int $sats, array $donor, string $public_name, string $public_message): array
     {
-        $title = wp_strip_all_tags($title);
+        $title = trim((string) get_post_field('post_title', $crowdfunding_id, 'raw'));
         $itemDesc = $title !== '' ? sprintf('Crowdfunding: %s', $title) : 'Crowdfunding';
         $itemCode = 'crowdfunding-' . $crowdfunding_id;
         $name = trim(($donor['first_name'] ?? '') . ' ' . ($donor['last_name'] ?? ''));

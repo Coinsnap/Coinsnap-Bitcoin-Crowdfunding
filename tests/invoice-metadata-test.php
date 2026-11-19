@@ -56,7 +56,7 @@ add_filter( 'pre_http_request', function ( $pre, $args, $url ) {
 global $wpdb;
 $table = $wpdb->prefix . 'crowdfunding_payments';
 
-$cf_id = wp_insert_post( array( 'post_type' => 'coinsnap-cfs', 'post_status' => 'publish', 'post_title' => 'New hackerspace roof' ) );
+$cf_id = wp_insert_post( array( 'post_type' => 'coinsnap-cfs', 'post_status' => 'publish', 'post_title' => 'Hackerspace\'s new roof' ) );
 foreach ( array(
 	'active' => '1', 'collect_donor_info' => '1', 'shoutout' => '1',
 	'first_name_visibility' => 'optional', 'last_name_visibility' => 'optional', 'email_visibility' => 'optional',
@@ -94,8 +94,8 @@ foreach ( array( 'coinsnap', 'btcpay' ) as $provider ) {
 	$m    = $sent['metadata'] ?? array();
 	t_ok( "$provider: orderId top level and in metadata", 1 === preg_match( '/^CRFN_[0-9a-f]{16}$/', (string) ( $sent['orderId'] ?? '' ) ) && ( $m['orderId'] ?? '' ) === $sent['orderId'] );
 	t_ok( "$provider: matching keys unchanged", (string) $cf_id === ( $m['crowdfunding_id'] ?? null ) && 'Bitcoin Crowdfunding' === ( $m['type'] ?? '' )
-		&& 'Donated for Crowdfunding' === ( $m['orderNumber'] ?? '' ) && 'New hackerspace roof' === ( $m['crowdfundName'] ?? '' ) );
-	t_ok( "$provider: item fields", 'Crowdfunding: New hackerspace roof' === ( $m['itemDesc'] ?? '' ) && "crowdfunding-$cf_id" === ( $m['itemCode'] ?? '' )
+		&& 'Donated for Crowdfunding' === ( $m['orderNumber'] ?? '' ) && get_the_title( $cf_id ) === ( $m['crowdfundName'] ?? '' ) );
+	t_ok( "$provider: item fields", 'Crowdfunding: Hackerspace\'s new roof' === ( $m['itemDesc'] ?? '' ) && "crowdfunding-$cf_id" === ( $m['itemCode'] ?? '' )
 		&& (string) $cf_id === ( $m['campaignId'] ?? '' ) );
 	$li = $m['lineItems'][0] ?? array();
 	t_ok( "$provider: lineItems", 1 === count( $m['lineItems'] ?? array() ) && 5000 === ( $li['total'] ?? 0 ) && 'SATS' === ( $li['currency'] ?? '' ) && 1 === ( $li['quantity'] ?? 0 ) );
