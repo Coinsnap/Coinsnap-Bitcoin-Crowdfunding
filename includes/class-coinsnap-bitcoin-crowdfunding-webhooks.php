@@ -141,6 +141,8 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks {
             'crowdfundName'   => $title,
             'orderNumber'     => 'Donated for Crowdfunding',
         ];
+        // Standard invoice fields (BTCPay/Coinsnap names) next to the keys above, which stay as they are.
+        $metadata += $this->standard_metadata($crowdfunding_id, $sats, $donor, $public_name, $public_message);
 
         $invoice = Coinsnap_Bitcoin_Crowdfunding_Security::create_invoice($cfg, $sats, $metadata, (string) ($donor['email'] ?? ''));
         if ($invoice === null) {
@@ -160,6 +162,51 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks {
         ], ['%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s']);
 
         return $invoice;
+    }
+
+    /**
+     * What the pledge is for and the donor's fields, under the BTCPay/Coinsnap names. Plain values;
+     * empty ones are left out when the invoice is created.
+     */
+    private function standard_metadata(int $crowdfunding_id, int $sats, array $donor, string $public_name, string $public_message): array
+    {
+        $title = trim((string) get_post_field('post_title', $crowdfunding_id, 'raw'));
+        $itemDesc = $title !== '' ? sprintf('Crowdfunding: %s', $title) : 'Crowdfunding';
+        $itemCode = 'crowdfunding-' . $crowdfunding_id;
+        $name = trim(($donor['first_name'] ?? '') . ' ' . ($donor['last_name'] ?? ''));
+        $formFields = [];
+        if (($donor['custom'] ?? '') !== '') {
+            $label = (string) get_post_meta($crowdfunding_id, '_coinsnap_bitcoin_crowdfunding_custom_field_name', true);
+            $formFields[$label !== '' ? $label : 'custom'] = $donor['custom'];
+        }
+
+        return [
+            'campaignId'    => (string) $crowdfunding_id,
+            'itemDesc'      => $itemDesc,
+            'itemCode'      => $itemCode,
+            'lineItems'     => [[
+                'name'     => $itemDesc,
+                'sku'      => $itemCode,
+                'quantity' => 1,
+                'price'    => $sats,
+                'total'    => $sats,
+                'currency' => 'SATS',
+            ]],
+            'customerName'  => $name,
+            'buyerName'     => $name,
+            'buyerEmail'    => (string) ($donor['email'] ?? ''),
+            'buyerAddress1' => trim(($donor['street'] ?? '') . ' ' . ($donor['house_number'] ?? '')),
+            'buyerZip'      => (string) ($donor['postal'] ?? ''),
+            'buyerCity'     => (string) ($donor['town'] ?? ''),
+            'buyerCountry'  => (string) ($donor['country'] ?? ''),
+            'buyerMessage'  => $public_message,
+            'shoutoutName'  => $public_name,
+            'formFields'    => $formFields,
+            'platform'      => 'wordpress',
+            'plugin'        => 'coinsnap-bitcoin-crowdfunding',
+            'pluginVersion' => COINSNAP_BITCOIN_CROWDFUNDING_VERSION,
+            'language'      => (string) get_locale(),
+        ];
     }
 
     /** Minimum donation in sats for the configured provider, or null if it can't be checked. */
