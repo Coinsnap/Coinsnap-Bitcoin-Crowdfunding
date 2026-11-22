@@ -29,51 +29,85 @@ class Coinsnap_Bitcoin_Crowdfunding_Client {
         }
     }
     
-    /*  Invoice::loadExchangeRates() method loads exchange rates 
-     *  for fiat and crypto currencies from coingecko.com server in real time.
-     *  We don't send any data from the plugin or Wordpress database.
+    const RATES_CACHE     = 'coinsnap_bitcoin_crowdfunding_rates';
+    const RATES_LAST_GOOD = 'coinsnap_bitcoin_crowdfunding_rates_last';
+    const RATES_TTL       = 10 * MINUTE_IN_SECONDS;
+    const RATES_RETRY     = MINUTE_IN_SECONDS;
+    const RATES_FAILED    = 'coinsnap_bitcoin_crowdfunding_rates_failed';
+
+    /*  loadExchangeRates() loads exchange rates for fiat and crypto currencies
+     *  from coingecko.com. We don't send any data from the plugin or WordPress database.
+     *  The rates are kept for 10 minutes, so pages don't call CoinGecko on every view
+     *  (it answers 429 when called too often). If CoinGecko fails, the last good rates
+     *  are used, and it is asked again after a minute.
      *  Method returns array with result code, exchange rates or error
      */
     public function loadExchangeRates(): array {
-        $url = 'https://api.coingecko.com/api/v3/exchange_rates';
-        $headers = [];
-        $method = 'GET';
-        $response = $this->remoteRequest($method, $url, $headers);
-        
-        if ($response['status'] === 200) {
-            $body = $response['body'];
+        $cached = get_transient(self::RATES_CACHE);
+        if (is_array($cached) && $cached !== []) {
+            return array('result' => true, 'data' => $cached);
         }
-        else {
-            return array('result' => false, 'error' => 'ratesLoadingError');
+
+        $failed = get_transient(self::RATES_FAILED);
+        if (is_string($failed) && $failed !== '') {
+            return array('result' => false, 'error' => $failed);
         }
-        
-        if (count($body)<1 || !isset($body['rates'])){
-            return array('result' => false, 'error' => 'ratesListError');
+
+        $fresh = $this->fetchExchangeRates();
+        if (is_array($fresh)) {
+            set_transient(self::RATES_CACHE, $fresh, self::RATES_TTL);
+            update_option(self::RATES_LAST_GOOD, $fresh, false);
+            return array('result' => true, 'data' => $fresh);
         }
-    
-        return array('result' => true, 'data' => $body['rates']);
+
+        $last = get_option(self::RATES_LAST_GOOD);
+        if (is_array($last) && $last !== []) {
+            set_transient(self::RATES_CACHE, $last, self::RATES_RETRY);
+            return array('result' => true, 'data' => $last);
+        }
+        set_transient(self::RATES_FAILED, $fresh, self::RATES_RETRY);
+        return array('result' => false, 'error' => $fresh);
     }
-    
+
+    /** The rates from CoinGecko, or an error key. */
+    private function fetchExchangeRates() {
+        $response = $this->remoteRequest('GET', 'https://api.coingecko.com/api/v3/exchange_rates', []);
+        if (($response['status'] ?? 0) !== 200) {
+            return 'ratesLoadingError';
+        }
+        $body = $response['body'] ?? null;
+        if (!is_array($body) || !is_array($body['rates'] ?? null) || $body['rates'] === []) {
+            return 'ratesListError';
+        }
+        return $body['rates'];
+    }
+
     public function checkPaymentData($amount,$currency,$provider = 'coinsnap',$mode = 'invoice'): array {
         
-        $btcPayCurrencies = $this->loadExchangeRates();
-            
-        if(!$btcPayCurrencies['result']){
-                return array('result' => false,'error' => $btcPayCurrencies['error'],'min_value' => '');
-            }
-            
-            elseif(!isset($btcPayCurrencies['data'][strtolower($currency)]) || $btcPayCurrencies['data'][strtolower($currency)]['value'] <= 0){
-                return array('result' => false,'error' => 'currencyError','min_value' => '');
-            }
-            
+        $currency = strtoupper((string) $currency);
+        // Rates are needed for a fiat amount, and for the on-chain minimum (0.50 EUR).
+        $btcPayCurrencies = ($currency === 'SATS' && $provider !== 'bitcoin')
+            ? array('result' => false, 'error' => '')
+            : $this->loadExchangeRates();
+
+        if($currency === 'SATS'){
+            // An amount in sats needs no exchange rate.
+            $rate = 0.00000001;
+        }
+        elseif(!$btcPayCurrencies['result']){
+            return array('result' => false,'error' => $btcPayCurrencies['error'],'min_value' => '');
+        }
+        elseif(!isset($btcPayCurrencies['data'][strtolower($currency)]) || $btcPayCurrencies['data'][strtolower($currency)]['value'] <= 0){
+            return array('result' => false,'error' => 'currencyError','min_value' => '');
+        }
+        else {
             $rate = 1/$btcPayCurrencies['data'][strtolower($currency)]['value'];
-                
+        }
         
         if($provider === 'bitcoin' || $provider === 'lightning'){
             
-            
-            
-                $eurbtc = (isset($btcPayCurrencies['data']['eur']['value']))? 1/$btcPayCurrencies['data']['eur']['value']*0.50 : 0.000005;
+                $eurValue = $btcPayCurrencies['result'] ? (float) ($btcPayCurrencies['data']['eur']['value'] ?? 0) : 0;
+                $eurbtc = ($eurValue > 0)? 1/$eurValue*0.50 : 0.000005;
                 $min_value_btcpay = ($provider === 'bitcoin')? $eurbtc : 0.0000001;
                 $min_value = $min_value_btcpay/$rate;
                 

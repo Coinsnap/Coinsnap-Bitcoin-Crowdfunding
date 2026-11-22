@@ -496,6 +496,14 @@
   display: none
 }
 
+.qr-open-checkout {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #6393c7;
+  text-align: center;
+  justify-content: center;
+}
+
 .qr-fiat {
   color: #585858;
   margin-bottom: 2px;

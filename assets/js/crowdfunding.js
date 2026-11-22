@@ -21,6 +21,11 @@ jQuery(document).ready(function ($) {
             multiPrimaryCurrency = defaultCurrency;
             multiSecondaryCurrency = (multiPrimaryCurrency === 'SATS') ? "EUR" : multiPrimaryCurrency;
 
+            const crowdfundingRateKnown = (rate) => {
+                const value = parseFloat(rate);
+                return Number.isFinite(value) && value > 0;
+            };
+
             const crowdfundingDefaults = () => {
                 for (let i = 1; i <= 3; i++) {
                     const amountField = document.getElementById(`coinsnap-bitcoin-crowdfunding-pay-crowdfunding-snap${i}-primary`);
@@ -43,6 +48,12 @@ jQuery(document).ready(function ($) {
                     primaryField.textContent = `${amount} ${multiPrimaryCurrency}`;
                 } else {
                     amount = cleanCrowdfundingAmount(primaryField.value);
+                }
+                // No exchange rate (e.g. the rate service is down): show no estimate rather than "≈ 0 SATS".
+                if (!crowdfundingRateKnown(currencyRate)) {
+                    document.getElementById(secondaryId).textContent = '';
+                    $('#'+secondaryId).attr('data-value','');
+                    return;
                 }
                 const converted = (currency === 'SATS')? (amount * currencyRate).toFixed(2) : (amount * currencyRate).toFixed(0);
                 const secondary = (currency === 'SATS')? 'EUR' : 'SATS';
@@ -79,6 +90,10 @@ jQuery(document).ready(function ($) {
                 const primaryField = document.getElementById(primaryId);
                 const primaryAmount = cleanCrowdfundingAmount(primaryField.textContent);
                 const secondaryField = document.getElementById(secondaryId);
+                if (!crowdfundingRateKnown(currencyRate)) {
+                    secondaryField.textContent = '';
+                    return;
+                }
                 const convertedPrimary = (primaryAmount / currencyRate).toFixed(0);
                 primaryField.textContent = `${convertedPrimary} ${multiPrimaryCurrency}`;
                 secondaryField.textContent = `≈ ${primaryAmount} ${multiSecondaryCurrency}`;

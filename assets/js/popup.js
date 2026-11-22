@@ -80,16 +80,24 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, redirect) => {
             },
             body: queryData
         }).catch(() => null);
-        if (!amountCheck) {
+        // A PHP notice in front of the JSON, or an HTML error page, must not leave the button stuck.
+        let responseData = null;
+        if (amountCheck) {
+            try {
+                responseData = await amountCheck.json();
+            } catch (e) {
+                responseData = null;
+            }
+        }
+        if (!responseData || typeof responseData !== 'object') {
             button.disabled = false;
+            addErrorCrowdfundingField(amountField, crowdfundingText('paymentError'));
             return;
         }
-        
-        const responseData = await amountCheck.json();
-  
+
         if(responseData.result === false){
             button.disabled = false;
-            addErrorCrowdfundingField(amountField,responseData.error);
+            addErrorCrowdfundingField(amountField, responseData.error || crowdfundingText('paymentError'));
             return;
         }
         
@@ -158,40 +166,87 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, redirect) => {
         const res = await createCrowdfundingInvoice(crowdfundingId, amount, donor);
 
         if (res && res.error) {
-            hideCrowdfundingElementById('payment-loading', prefix, sufix);
-            showCrowdfundingElementById('public-donor-popup', 'flex', prefix, sufix);
+            // Close the popup so the message next to the amount can be read.
+            resetPopup(prefix, sufix);
             addErrorCrowdfundingField(document.getElementById(`${prefix}amount${sufix}`), res.error);
             return;
         }
 
         if (res) {
-            // Update addresses 
-            const qrLightning = res.lightningInvoice || '';
+            const target = crowdfundingPaymentTarget(res);
+            const isLightning = target.kind === 'lightning';
+            const qrLightning = isLightning ? target.text : '';
             const qrBitcoin = res.onchainAddress || '';
+            const checkoutLink = res.checkoutLink || '';
 
             if (qrBitcoin) {
                 showCrowdfundingElementsById(['btc-wrapper', 'qr-btc-container'], 'flex', prefix, sufix)
             }
+            if (isLightning) {
+                showCrowdfundingElementById('lightning-wrapper', 'block', prefix, sufix);
+                showCrowdfundingElementById('qr-lightning-container', 'flex', prefix, sufix);
+            } else {
+                hideCrowdfundingElementsById(['lightning-wrapper', 'qr-lightning-container'], prefix, sufix);
+            }
 
             // Hide spinner and show qr code stuff
-            showCrowdfundingElementsById(['qrCode', 'lightning-wrapper', 'qr-fiat', 'qrCodeBtc'], 'block', prefix, sufix);
-            showCrowdfundingElementsById(['qr-summary', 'qr-lightning-container', 'pay-in-wallet'], 'flex', prefix, sufix);
+            if (target.qr) {
+                showCrowdfundingElementById('qrCode', 'block', prefix, sufix);
+                showCrowdfundingElementById('qrCodeBtc', 'block', prefix, sufix);
+            } else {
+                hideCrowdfundingElementsById(['qrCode', 'qrCodeBtc'], prefix, sufix);
+            }
+            showCrowdfundingElementById('qr-summary', 'flex', prefix, sufix);
+            if (target.link) {
+                showCrowdfundingElementById('pay-in-wallet', 'flex', prefix, sufix);
+            } else {
+                hideCrowdfundingElementById('pay-in-wallet', prefix, sufix);
+            }
+            const openCheckout = document.getElementById(`${prefix}open-checkout${sufix}`);
+            if (openCheckout) {
+                if (checkoutLink) {
+                    openCheckout.setAttribute('href', checkoutLink);
+                    openCheckout.style.display = 'flex';
+                } else {
+                    openCheckout.removeAttribute('href');
+                    openCheckout.style.display = 'none';
+                }
+            }
             hideCrowdfundingElementById('payment-loading', prefix, sufix);
             showCrowdfundingElementById('payment-popup', 'flex', prefix, sufix);
             
             // Update actuall data
-            document.getElementById(`${prefix}qrCode${sufix}`).src = res.qrCodes.lightningQR;
-            document.getElementById(`${prefix}qr-lightning${sufix}`).textContent = `${qrLightning.substring(0, 20)}...${qrLightning.slice(-15)}`;
+            if (target.qr) {
+                document.getElementById(`${prefix}qrCode${sufix}`).src = target.qr;
+            } else {
+                document.getElementById(`${prefix}qrCode${sufix}`).removeAttribute('src');
+            }
+            document.getElementById(`${prefix}qr-lightning${sufix}`).textContent = qrLightning ? `${qrLightning.substring(0, 20)}...${qrLightning.slice(-15)}` : '';
             document.getElementById(`${prefix}qr-btc${sufix}`).textContent = `${qrBitcoin.substring(0, 20)}...${qrBitcoin.slice(-15)}`;
-            document.getElementById(`${prefix}qr-amount${sufix}`).textContent = `Amount: ${res.amount} sats`;
+            document.getElementById(`${prefix}qr-amount${sufix}`).textContent = crowdfundingText('amountLabel').replace('%s', res.amount);
 
             // Copy address functionallity 
             const copyLightning = document.querySelector(`#${prefix}qr-lightning-container${sufix} .qr-copy-icon`);
             const copyBtc = document.querySelector(`#${prefix}qr-btc-container${sufix} .qr-copy-icon`);
-            copyLightning.addEventListener('click', () => { navigator.clipboard.writeText(qrLightning); });
-            copyBtc.addEventListener('click', () => { navigator.clipboard.writeText(qrBitcoin); });
-            document.getElementById(`${prefix}qr-fiat${sufix}`).textContent = `≈ ${amountFiat} ${currency}`;
-            document.getElementById(`${prefix}pay-in-wallet${sufix}`).setAttribute('href', `lightning:${qrLightning}`);
+            copyLightning.onclick = () => { navigator.clipboard.writeText(qrLightning); };
+            copyBtc.onclick = () => { navigator.clipboard.writeText(qrBitcoin); };
+
+            // The other currency next to the sats: EUR on a SATS campaign, the campaign's currency otherwise.
+            const fiatCurrency = (currency === 'SATS') ? 'EUR' : currency;
+            const fiatField = document.getElementById(`${prefix}qr-fiat${sufix}`);
+            if (Number.isFinite(amountFiat) && amountFiat > 0) {
+                fiatField.textContent = `≈ ${amountFiat} ${fiatCurrency}`;
+                fiatField.style.display = 'block';
+            } else {
+                fiatField.textContent = '';
+                fiatField.style.display = 'none';
+            }
+            const payInWallet = document.getElementById(`${prefix}pay-in-wallet${sufix}`);
+            if (target.link) {
+                payInWallet.setAttribute('href', target.link);
+            } else {
+                payInWallet.removeAttribute('href');
+            }
 
             // Reset retry counter
             var retryNum = 0;
@@ -232,8 +287,8 @@ const addCrowdfundingPopupListener = (prefix, sufix, type, redirect) => {
 
         }
         else {
-            hideCrowdfundingElementById('payment-loading', prefix, sufix);
-            showCrowdfundingElementById('public-donor-popup', 'flex', prefix, sufix);
+            resetPopup(prefix, sufix);
+            addErrorCrowdfundingField(document.getElementById(`${prefix}amount${sufix}`), crowdfundingText('paymentError'));
         }
 
     });

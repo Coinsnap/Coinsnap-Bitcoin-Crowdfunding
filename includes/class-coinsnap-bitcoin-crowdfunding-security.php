@@ -133,9 +133,10 @@ class Coinsnap_Bitcoin_Crowdfunding_Security {
 
     /**
      * Create an invoice from server-side data only.
-     * Returns the fields the browser may see, or null on failure.
+     * Returns the fields the browser may see, or null on failure. When the provider refuses
+     * the invoice (4xx, e.g. an amount below the on-chain dust limit), $refusal gets its message.
      */
-    public static function create_invoice(array $cfg, int $sats, array $metadata, string $buyerEmail): ?array {
+    public static function create_invoice(array $cfg, int $sats, array $metadata, string $buyerEmail, ?string &$refusal = null): ?array {
         $orderId = 'CRFN_' . bin2hex(random_bytes(8));
         $fields = [
             'amount'                => $sats,
@@ -156,6 +157,9 @@ class Coinsnap_Bitcoin_Crowdfunding_Security {
         $inv = $r['body'];
         if ($r['code'] !== 200 || !is_array($inv) || !is_string($inv['id'] ?? null)) {
             self::log('info', 'invoice create failed');
+            if (in_array($r['code'], [400, 422], true) && is_array($inv) && is_string($inv['message'] ?? null)) {
+                $refusal = mb_substr(sanitize_text_field($inv['message']), 0, 300);
+            }
             return null;
         }
 
@@ -165,9 +169,11 @@ class Coinsnap_Bitcoin_Crowdfunding_Security {
             'checkoutLink'     => (string) ($inv['checkoutLink'] ?? ''),
             'lightningInvoice' => (string) ($inv['lightningInvoice'] ?? ''),
             'onchainAddress'   => (string) ($inv['onchainAddress'] ?? ''),
+            // BIP21 URI with the amount, for stores without Lightning (a bare address has no amount).
+            'bip21'            => (string) ($inv['bip21'] ?? ''),
             'qrCodes'          => [
                 'lightningQR' => (string) ($inv['qrCodes']['lightningQR'] ?? ''),
-                'onchainQR'   => (string) ($inv['qrCodes']['onchainQR'] ?? ''),
+                'bip21QR'     => (string) ($inv['qrCodes']['bip21QR'] ?? ($inv['qrCodes']['bitcoinQR'] ?? '')),
             ],
             'paymentLink'      => '',
         ];
@@ -181,6 +187,12 @@ class Coinsnap_Bitcoin_Crowdfunding_Security {
                         $out['paymentLink'] = $link;
                         $out['lightningInvoice'] = substr($link, strlen('lightning:'));
                         break;
+                    }
+                    if ($out['bip21'] === '' && stripos($link, 'bitcoin:') === 0) {
+                        $out['bip21'] = $link;
+                        if ($out['onchainAddress'] === '') {
+                            $out['onchainAddress'] = (string) ($method['destination'] ?? '');
+                        }
                     }
                     if ($out['paymentLink'] === '' && $link !== '') {
                         $out['paymentLink'] = $link;

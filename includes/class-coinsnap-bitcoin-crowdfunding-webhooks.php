@@ -36,6 +36,15 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks {
         $start_time = time();
         $timeout = 5;
 
+        $status = $wpdb->get_var($wpdb->prepare("SELECT status FROM %i WHERE payment_id = %s", $this->table(), $payment_id));
+        if ($status === 'completed') {
+            return ['status' => 'completed'];
+        }
+        // Without a webhook the row never changes, so ask the API about invoices this plugin created.
+        if ($status === 'pending' && $this->confirm_from_api($payment_id)) {
+            return ['status' => 'completed'];
+        }
+
         while (time() - $start_time < $timeout) {
             $status = $wpdb->get_var($wpdb->prepare(
                 "SELECT status FROM %i WHERE payment_id = %s",
@@ -49,6 +58,20 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks {
         return ['status' => 'pending'];
     }
 
+    /**
+     * Webhook fallback for the status check: ask the provider about a pending invoice that has a
+     * row (so this plugin created it) and apply it as the webhook would. At most one API call per
+     * invoice every 10 seconds, however often the page polls.
+     */
+    private function confirm_from_api(string $invoiceId): bool
+    {
+        $throttle = 'coinsnap_bitcoin_crowdfunding_poll_' . md5($invoiceId);
+        if (get_transient($throttle) !== false) {
+            return false;
+        }
+        set_transient($throttle, 1, 10);
+        return $this->apply_invoice($invoiceId, false) === 'paid';
+    }
     /* ---------------------------------------------------------------------
      * Public: start a donation. The browser sends the crowdfunding ID, the
      * amount in sats and the donor's form fields; the server creates the invoice.
@@ -144,9 +167,16 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks {
         // Standard invoice fields (BTCPay/Coinsnap names) next to the keys above, which stay as they are.
         $metadata += $this->standard_metadata($crowdfunding_id, $sats, $donor, $public_name, $public_message);
 
-        $invoice = Coinsnap_Bitcoin_Crowdfunding_Security::create_invoice($cfg, $sats, $metadata, (string) ($donor['email'] ?? ''));
+        $refusal = null;
+        $invoice = Coinsnap_Bitcoin_Crowdfunding_Security::create_invoice($cfg, $sats, $metadata, (string) ($donor['email'] ?? ''), $refusal);
+        if ($invoice === null && $refusal !== null && $refusal !== '') {
+            // The provider's own reason, e.g. the amount is too small for an on-chain payment.
+            return new WP_Error('invoice_refused', esc_html(sprintf(
+                /* translators: %s: reason given by the payment provider */
+                __('The payment provider did not accept this donation: %s', 'coinsnap-bitcoin-crowdfunding'), $refusal)), ['status' => 400]);
+        }
         if ($invoice === null) {
-            return new WP_Error('unavailable', 'Unavailable', ['status' => 503]);
+            return new WP_Error('unavailable', esc_html__('The payment could not be started. Please try again later.', 'coinsnap-bitcoin-crowdfunding'), ['status' => 503]);
         }
 
         global $wpdb;
@@ -253,48 +283,72 @@ class Coinsnap_Bitcoin_Crowdfunding_Webhooks {
         }
         $claimsPaid = in_array($data['type'] ?? '', ['Settled', 'InvoiceSettled'], true);
 
+        $result = $this->apply_invoice($invoiceId, $claimsPaid, true);
+        return new WP_REST_Response(null, $result === 'retry' ? 503 : 200);
+    }
+
+    /**
+     * Fetch the invoice from the API and, if it pays the stored row, mark it completed once and
+     * create the donor post. Used by the webhook and by the status check.
+     *
+     * @param bool $claimsPaid  The webhook said Settled (only for the forged-status log).
+     * @param bool $fromWebhook Webhook call: also accepts invoices from before the upgrade that have
+     *                          no row, and logs. The status check only acts on existing rows, quietly.
+     * @return string 'paid', 'retry' (API unavailable) or 'ignored'
+     */
+    private function apply_invoice(string $invoiceId, bool $claimsPaid, bool $fromWebhook = false): string
+    {
+        $log = static function (string $level, string $reason) use ($fromWebhook, $invoiceId): void {
+            if ($fromWebhook) {
+                Coinsnap_Bitcoin_Crowdfunding_Security::log($level, $reason, $invoiceId);
+            }
+        };
         $cfg = Coinsnap_Bitcoin_Crowdfunding_Security::config();
+        if (!Coinsnap_Bitcoin_Crowdfunding_Security::is_configured($cfg)) {
+            return 'retry';
+        }
         try {
             $invoice = Coinsnap_Bitcoin_Crowdfunding_Security::fetch_invoice($cfg, $invoiceId);
         } catch (RuntimeException $e) {
-            Coinsnap_Bitcoin_Crowdfunding_Security::log('info', 'retry: API unavailable', $invoiceId);
-            return new WP_REST_Response(null, 503);
+            $log('info', 'retry: API unavailable');
+            return 'retry';
         }
         if ($invoice === null || ($invoice['id'] ?? '') !== $invoiceId) {
-            Coinsnap_Bitcoin_Crowdfunding_Security::log('info', 'unknown invoice', $invoiceId);
-            return new WP_REST_Response(null, 200);
+            $log('info', 'unknown invoice');
+            return 'ignored';
         }
 
         global $wpdb;
         $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM %i WHERE payment_id = %s", $this->table(), $invoiceId), ARRAY_A);
-        if (!$row) {
+        if (!$row && $fromWebhook) {
             $row = $this->legacy_row($invoice);
         }
         $metaId = (string) ($invoice['metadata']['crowdfunding_id'] ?? '');
         if (!$row || $metaId !== (string) $row['crowdfunding_id']) {
-            Coinsnap_Bitcoin_Crowdfunding_Security::log('info', 'not ours', $invoiceId);
-            return new WP_REST_Response(null, 200);
+            $log('info', 'not ours');
+            return 'ignored';
         }
 
         if (!Coinsnap_Bitcoin_Crowdfunding_Security::invoice_pays($invoice, (int) $row['amount'], (string) $row['currency'], $cfg['provider'] === 'btcpay')) {
             $forged = $claimsPaid && ($invoice['additionalStatus'] ?? '') !== 'Marked';
-            Coinsnap_Bitcoin_Crowdfunding_Security::log($forged ? 'security' : 'info',
-                $forged ? 'forged status' : 'status ' . preg_replace('/[^A-Za-z]/', '', (string) ($invoice['status'] ?? '?')), $invoiceId);
-            return new WP_REST_Response(null, 200);
+            $log($forged ? 'security' : 'info',
+                $forged ? 'forged status' : 'status ' . preg_replace('/[^A-Za-z]/', '', (string) ($invoice['status'] ?? '?')));
+            return 'ignored';
         }
 
-        // Act once, and only move pending -> completed.
+        // Act once, and only move pending -> completed. A webhook and a status check racing on
+        // the same invoice can't both get through.
         $updated = $wpdb->query($wpdb->prepare(
             "UPDATE %i SET status = 'completed' WHERE payment_id = %s AND status = 'pending'",
             $this->table(), $invoiceId
         ));
         if ($updated !== 1) {
-            Coinsnap_Bitcoin_Crowdfunding_Security::log('info', 'already processed', $invoiceId);
-            return new WP_REST_Response(null, 200);
+            $log('info', 'already processed');
+            return 'paid';
         }
 
         $this->create_donor_post($row, $invoiceId);
-        return new WP_REST_Response(null, 200);
+        return 'paid';
     }
 
     /**
