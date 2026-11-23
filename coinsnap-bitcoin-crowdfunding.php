@@ -173,16 +173,22 @@ class Coinsnap_Bitcoin_Crowdfunding
             esc_html__('Connect webhook', 'coinsnap-bitcoin-crowdfunding'));
     }
 
+    /** A text field from the POST body. FILTER_SANITIZE_STRING is deprecated since PHP 8.1. */
+    private function postString(string $key): string {
+        $value = filter_input(INPUT_POST, $key, FILTER_UNSAFE_RAW);
+        return is_string($value) ? sanitize_text_field($value) : '';
+    }
+
     public function coinsnapAmountCheck(){
 
-        $_nonce = filter_input(INPUT_POST,'apiNonce',FILTER_SANITIZE_STRING);
+        $_nonce = $this->postString('apiNonce');
         if ( !wp_verify_nonce( $_nonce, 'coinsnap-bitcoin-crowdfunding-public' ) ) {
             wp_die('Unauthorized!', '', ['response' => 401]);
         }
         
         $client = new Coinsnap_Bitcoin_Crowdfunding_Client();
-        $amount = filter_input(INPUT_POST,'apiAmount',FILTER_SANITIZE_STRING);
-        $currency = filter_input(INPUT_POST,'apiCurrency',FILTER_SANITIZE_STRING);
+        $amount = $this->postString('apiAmount');
+        $currency = strtoupper($this->postString('apiCurrency'));
         
         try {
             $_provider = $this->getPaymentProvider();
@@ -190,22 +196,19 @@ class Coinsnap_Bitcoin_Crowdfunding
                 try {
                     $storePaymentMethods = $client->getStorePaymentMethods($this->getApiUrl(), $this->getApiKey(), $this->getStoreId());
 
-                    if ($storePaymentMethods['code'] === 200) {
-                        if(!$storePaymentMethods['result']['onchain'] && !$storePaymentMethods['result']['lightning']){
-                            $errorMessage = __( 'No payment method is configured on BTCPay server', 'coinsnap-bitcoin-crowdfunding' );
-                            $checkInvoice = array('result' => false,'error' => esc_html($errorMessage));
-                        }
-                    }
-                    else {
+                    if (($storePaymentMethods['code'] ?? 0) !== 200) {
                         $errorMessage = __( 'Error store loading. Wrong or empty Store ID', 'coinsnap-bitcoin-crowdfunding' );
                         $checkInvoice = array('result' => false,'error' => esc_html($errorMessage));
                     }
-
-                    if($storePaymentMethods['result']['onchain'] && !$storePaymentMethods['result']['lightning']){
-                        $checkInvoice = $client->checkPaymentData((float)$amount,strtoupper( $currency ),'bitcoin');
+                    elseif(!empty($storePaymentMethods['result']['lightning'])){
+                        $checkInvoice = $client->checkPaymentData((float)$amount, $currency,'lightning');
                     }
-                    elseif($storePaymentMethods['result']['lightning']){
-                        $checkInvoice = $client->checkPaymentData((float)$amount,strtoupper( $currency ),'lightning');
+                    elseif(!empty($storePaymentMethods['result']['onchain'])){
+                        $checkInvoice = $client->checkPaymentData((float)$amount, $currency,'bitcoin');
+                    }
+                    else {
+                        $errorMessage = __( 'No payment method is configured on BTCPay server', 'coinsnap-bitcoin-crowdfunding' );
+                        $checkInvoice = array('result' => false,'error' => esc_html($errorMessage));
                     }
                 }
                 catch (\Throwable $e){
@@ -214,18 +217,9 @@ class Coinsnap_Bitcoin_Crowdfunding
                 }
             }
             else {
-                $checkInvoice = $client->checkPaymentData((float)$amount,strtoupper( $currency ));
-                if($checkInvoice['error'] === 'currencyError'){
-                    $checkInvoice['error'] = sprintf( 
-                        /* translators: 1: Currency */
-                        __( 'Currency %1$s is not supported by Coinsnap', 'coinsnap-bitcoin-crowdfunding' ), strtoupper( $currency ));
-                }
-                elseif($checkInvoice['error'] === 'amountError'){
-                    $checkInvoice['error'] = sprintf( 
-                        /* translators: 1: Amount, 2: Currency */
-                        __( 'Invoice amount cannot be less than %1$s %2$s', 'coinsnap-bitcoin-crowdfunding' ), $checkInvoice['min_value'], strtoupper( $currency ));
-                }
+                $checkInvoice = $client->checkPaymentData((float)$amount, $currency);
             }
+            $checkInvoice['error'] = $this->amountCheckMessage($checkInvoice, $currency);
         }
         catch (\Throwable $e){
             $errorMessage = __( 'API connection is not established', 'coinsnap-bitcoin-crowdfunding' );
@@ -233,12 +227,38 @@ class Coinsnap_Bitcoin_Crowdfunding
         }
         return $this->sendJsonResponse($checkInvoice);
     }
+
+    /** A readable message for the error keys the client returns; other messages pass through. */
+    private function amountCheckMessage(array $check, string $currency): string {
+        if (!empty($check['result'])) {
+            return '';
+        }
+        $error = (string) ($check['error'] ?? '');
+        switch ($error) {
+            case 'currencyError':
+                /* translators: 1: Currency */
+                return sprintf(__( 'Currency %1$s is not supported by Coinsnap', 'coinsnap-bitcoin-crowdfunding' ), $currency);
+            case 'amountError':
+                if (($check['min_value'] ?? '') === '') {
+                    return __( 'Please enter an amount', 'coinsnap-bitcoin-crowdfunding' );
+                }
+                /* translators: 1: Amount, 2: Currency */
+                return sprintf(__( 'Invoice amount cannot be less than %1$s %2$s', 'coinsnap-bitcoin-crowdfunding' ), $check['min_value'], $currency);
+            case 'ratesLoadingError':
+            case 'ratesListError':
+                return __( 'Exchange rates are not available right now. Please try again in a few minutes or donate in SATS.', 'coinsnap-bitcoin-crowdfunding' );
+            case 'currenciesError':
+            case '':
+                return __( 'The payment could not be started. Please try again later.', 'coinsnap-bitcoin-crowdfunding' );
+        }
+        return $error;
+    }
     
     public function coinsnapConnectionHandler(){
         if ( !current_user_can( 'manage_options' ) ) {
             wp_die('Unauthorized!', '', ['response' => 403]);
         }
-        $_nonce = filter_input(INPUT_POST,'apiNonce',FILTER_SANITIZE_STRING);
+        $_nonce = $this->postString('apiNonce');
         if ( !wp_verify_nonce( $_nonce, 'coinsnap-ajax-nonce' ) ) {
             wp_die('Unauthorized!', '', ['response' => 401]);
         }
@@ -252,7 +272,7 @@ class Coinsnap_Bitcoin_Crowdfunding
         $coinsnap_bitcoin_crowdfunding_data = get_option('coinsnap_bitcoin_crowdfunding_options', []);
         
         $_provider = $this->getPaymentProvider();
-        $currency = ('' !== filter_input(INPUT_POST,'apiPost',FILTER_SANITIZE_STRING))? get_post_meta(filter_input(INPUT_POST,'apiPost',FILTER_SANITIZE_STRING), '_coinsnap_bitcoin_crowdfunding_default_currency', true) : 'EUR';
+        $currency = ('' !== $this->postString('apiPost'))? get_post_meta($this->postString('apiPost'), '_coinsnap_bitcoin_crowdfunding_default_currency', true) : 'EUR';
         $client = new Coinsnap_Bitcoin_Crowdfunding_Client();
         
         if($_provider === 'btcpay'){
@@ -329,34 +349,34 @@ class Coinsnap_Bitcoin_Crowdfunding
     
     private function getPaymentProvider() {
         $coinsnap_bitcoin_crowdfunding_data = get_option('coinsnap_bitcoin_crowdfunding_options', []);
-        return ($coinsnap_bitcoin_crowdfunding_data['provider'] === 'btcpay')? 'btcpay' : 'coinsnap';
+        return (($coinsnap_bitcoin_crowdfunding_data['provider'] ?? '') === 'btcpay')? 'btcpay' : 'coinsnap';
     }
 
     private function getApiKey() {
         $coinsnap_bitcoin_crowdfunding_data = get_option('coinsnap_bitcoin_crowdfunding_options', []);
-        return ($this->getPaymentProvider() === 'btcpay')? $coinsnap_bitcoin_crowdfunding_data['btcpay_api_key']  : $coinsnap_bitcoin_crowdfunding_data['coinsnap_api_key'];
+        return ($this->getPaymentProvider() === 'btcpay')? ($coinsnap_bitcoin_crowdfunding_data['btcpay_api_key'] ?? '') : ($coinsnap_bitcoin_crowdfunding_data['coinsnap_api_key'] ?? '');
     }
     
     private function getStoreId() {
 	$coinsnap_bitcoin_crowdfunding_data = get_option('coinsnap_bitcoin_crowdfunding_options', []);
-        return ($this->getPaymentProvider() === 'btcpay')? $coinsnap_bitcoin_crowdfunding_data['btcpay_store_id'] : $coinsnap_bitcoin_crowdfunding_data['coinsnap_store_id'];
+        return ($this->getPaymentProvider() === 'btcpay')? ($coinsnap_bitcoin_crowdfunding_data['btcpay_store_id'] ?? '') : ($coinsnap_bitcoin_crowdfunding_data['coinsnap_store_id'] ?? '');
     }
     
     public function getApiUrl() {
         $coinsnap_bitcoin_crowdfunding_data = get_option('coinsnap_bitcoin_crowdfunding_options', []);
-        return ($this->getPaymentProvider() === 'btcpay')? $coinsnap_bitcoin_crowdfunding_data['btcpay_url'] : COINSNAP_SERVER_URL;
+        return ($this->getPaymentProvider() === 'btcpay')? ($coinsnap_bitcoin_crowdfunding_data['btcpay_url'] ?? '') : COINSNAP_SERVER_URL;
     }
     
     function btcpayApiUrlHandler(){
             if ( !current_user_can( 'manage_options' ) ) {
                 wp_die('Unauthorized!', '', ['response' => 403]);
             }
-            $_nonce = filter_input(INPUT_POST,'apiNonce',FILTER_SANITIZE_STRING);
+            $_nonce = $this->postString('apiNonce');
             if ( !wp_verify_nonce( $_nonce, 'coinsnap-ajax-nonce' ) ) {
                 wp_die('Unauthorized!', '', ['response' => 401]);
             }
 
-            $host = filter_var(filter_input(INPUT_POST,'host',FILTER_SANITIZE_STRING), FILTER_VALIDATE_URL);
+            $host = filter_var($this->postString('host'), FILTER_VALIDATE_URL);
             if ($host === false || (substr( $host, 0, 7 ) !== "http://" && substr( $host, 0, 8 ) !== "https://")) {
                 wp_send_json_error("Error validating BTCPayServer URL.");
             }
@@ -415,6 +435,11 @@ class Coinsnap_Bitcoin_Crowdfunding
                 'provider' => (($coinsnap_bitcoin_crowdfunding_data['provider'] ?? '') === 'btcpay') ? 'btcpay' : 'coinsnap',
                 'invoiceUrl' => rest_url('coinsnap-bitcoin-crowdfunding/v1/invoice'),
                 'statusUrl' => rest_url('crowdfunding/v1/check-payment-status/'),
+                'i18n' => [
+                    'paymentError' => __('The payment could not be started. Please try again later.', 'coinsnap-bitcoin-crowdfunding'),
+                    /* translators: %s: amount in sats */
+                    'amountLabel' => __('Amount: %s sats', 'coinsnap-bitcoin-crowdfunding'),
+                ],
             ]);
 
             wp_enqueue_script('coinsnap-bitcoin-crowdfunding-popup-script', plugin_dir_url(__FILE__) . 'assets/js/popup.js', ['jquery'], COINSNAP_BITCOIN_CROWDFUNDING_VERSION, true);

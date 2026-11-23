@@ -53,6 +53,41 @@ async function generateQRCodeCrowdfundingDataURL(text) {
     }
 }
 
+/* Translated messages from the server, with an English fallback. */
+const crowdfundingText = (key) => {
+    const texts = (typeof Coinsnap_Bitcoin_Crowdfunding_sharedData !== 'undefined' && Coinsnap_Bitcoin_Crowdfunding_sharedData.i18n) || {};
+    const fallback = {
+        paymentError: 'The payment could not be started. Please try again later.',
+        amountLabel: 'Amount: %s sats',
+    };
+    return texts[key] || fallback[key] || '';
+};
+
+/*
+ * What the payment popup shows. A Lightning invoice is used only when the store
+ * returned one; otherwise the on-chain BIP21 link, which carries the amount.
+ */
+const crowdfundingPaymentTarget = (res) => {
+    const qrCodes = (res && res.qrCodes) || {};
+    const lightning = (res && res.lightningInvoice) || '';
+    if (lightning) {
+        return { kind: 'lightning', qr: qrCodes.lightningQR || '', link: `lightning:${lightning}`, text: lightning };
+    }
+    const address = (res && res.onchainAddress) || '';
+    let bip21 = (res && res.bip21) || '';
+    const sats = parseInt(res && res.amount, 10);
+    if (!bip21 && address && sats > 0) {
+        const btc = (sats / 100000000).toFixed(8).replace(/\.?0+$/, '');
+        bip21 = `bitcoin:${address}?amount=${btc}`;
+    }
+    return {
+        kind: bip21 ? 'bitcoin' : '',
+        qr: bip21 ? (qrCodes.bip21QR || qrCodes.bitcoinQR || '') : '',
+        link: bip21,
+        text: address,
+    };
+};
+
 /*
  * The server creates the invoice. The browser sends only the crowdfunding ID,
  * the amount in sats and the donor's form fields; it never sees an API key.
@@ -68,14 +103,19 @@ const createCrowdfundingInvoice = async (crowdfundingId, sats, donor) => {
                 amount: Math.round(sats)
             }))
         });
-        const responseData = await response.json();
-        if (!response.ok) {
-            return { error: responseData?.message || 'Error' };
+        const responseData = await response.json().catch(() => null);
+        if (!response.ok || !responseData) {
+            return { error: responseData?.message || crowdfundingText('paymentError') };
         }
 
-        if (Coinsnap_Bitcoin_Crowdfunding_sharedData.provider === 'btcpay' && responseData.paymentLink) {
-            const qrCodeImage = await generateQRCodeCrowdfundingDataURL(responseData.paymentLink);
-            responseData.qrCodes = { lightningQR: qrCodeImage || responseData.paymentLink };
+        // BTCPay returns no QR images: make one for the link the popup will use.
+        if (Coinsnap_Bitcoin_Crowdfunding_sharedData.provider === 'btcpay') {
+            responseData.qrCodes = responseData.qrCodes || {};
+            if (responseData.lightningInvoice && responseData.paymentLink && !responseData.qrCodes.lightningQR) {
+                responseData.qrCodes.lightningQR = await generateQRCodeCrowdfundingDataURL(responseData.paymentLink) || '';
+            } else if (!responseData.lightningInvoice && responseData.bip21 && !responseData.qrCodes.bip21QR) {
+                responseData.qrCodes.bip21QR = await generateQRCodeCrowdfundingDataURL(responseData.bip21) || '';
+            }
         }
         return responseData;
     } catch (error) {
@@ -193,3 +233,7 @@ const showCrowdfundingElementsById = (ids, display, prefix = '', sufix = '') => 
         showCrowdfundingElementById(id, display, prefix, sufix);
     });
 };
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { crowdfundingPaymentTarget };
+}

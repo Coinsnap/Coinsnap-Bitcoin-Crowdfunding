@@ -132,6 +132,7 @@ if (! defined('ABSPATH')) {
             </div>
         </details>
         <a id="<?php echo esc_html($prefix);?>pay-in-wallet<?php echo esc_html($sufix); ?>" class="qr-pay-in-wallet"><?php echo esc_html_e('Pay in wallet', 'coinsnap-bitcoin-crowdfunding');?></a>
+        <a id="<?php echo esc_html($prefix);?>open-checkout<?php echo esc_html($sufix); ?>" class="qr-open-checkout" style="display: none;" target="_blank" rel="noopener"><?php esc_html_e('Open checkout', 'coinsnap-bitcoin-crowdfunding');?></a>
     </div>
     <div id="<?php echo esc_html($prefix); ?>thank-you-popup<?php echo esc_html($sufix); ?>" class="thank-you-popup">
         <img class="checkmark-img" id="checkmark" alt="Checkmark" src="<?php echo esc_url(COINSNAP_BITCOIN_CROWDFUNDING_PLUGIN_DIR . 'assets/images/checkmark.svg'); ?>">
