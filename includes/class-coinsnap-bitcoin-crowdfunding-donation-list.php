@@ -36,8 +36,8 @@ class Coinsnap_Bitcoin_Crowdfunding_Donation_List {
 			return [];
 		}
 		$filtered_invoices = array_filter($invoices, function ($invoice) {
-			return isset($invoice['metadata']['referralCode'])
-				&& $invoice['metadata']['referralCode'] === "D19833"
+			// The referral code is a top-level invoice field and is not in the metadata.
+			return isset($invoice['metadata']['type'], $invoice['status'])
 				&& $invoice['status'] === 'Settled'
 				&& $invoice['metadata']['type'] === 'Bitcoin Crowdfunding';
 		});

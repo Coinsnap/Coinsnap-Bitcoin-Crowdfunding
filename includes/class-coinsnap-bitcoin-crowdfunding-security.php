@@ -237,6 +237,10 @@ class Coinsnap_Bitcoin_Crowdfunding_Security {
         $url = self::webhook_url();
 
         $list = self::api($cfg, 'GET', '/webhooks');
+        if ($cfg['provider'] === 'coinsnap' && $list['code'] === 400) {
+            // Coinsnap's answer for a store without webhooks ("No webhooks found."): an empty list.
+            $list = ['code' => 200, 'body' => []];
+        }
         if ($list['code'] !== 200 || !is_array($list['body'])) {
             // An API error is never "no webhook": don't create a second one.
             self::log('info', 'webhook list failed');
